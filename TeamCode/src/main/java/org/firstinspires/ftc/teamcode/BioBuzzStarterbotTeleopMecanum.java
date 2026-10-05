@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  * Driver-controlled program for the goBILDA 2026-2027 BIOBUZZ StarterBot with
  * mecanum wheels. The hardware names match Jimothy's starter_bot configuration.
  */
-@TeleOp(name = "Mec BioBuzz StarterBot Teleop v4", group = "StarterBot")
+@TeleOp(name = "Mec BioBuzz StarterBot Teleop v5", group = "StarterBot")
 public class BioBuzzStarterbotTeleopMecanum extends OpMode {
 
     private DcMotor leftFrontDrive;
@@ -49,14 +49,17 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
     private CRServo rightIntakeServo;
     private CRServo windmillServo;
 
-    public static final int LAUNCHER_TARGET_VELOCITY = 375;
-    public static final int LAUNCHER_EJECT_VELOCITY = 125;
+    public static final int LAUNCHER_TARGET_VELOCITY = 350;
+    // Reverse/eject at 10% of the normal shooting velocity.
+    public static final int LAUNCHER_EJECT_VELOCITY = 35;
+    public static final int LAUNCHER_READY_TOLERANCE = 15;
 
     private double leftFrontPower;
     private double rightFrontPower;
     private double leftBackPower;
     private double rightBackPower;
     private double intakePower;
+    private double intakeServoPower;
     private double windmillPower;
 
     @Override
@@ -98,14 +101,30 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
 
     @Override
     public void loop() {
-        mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        // This robot's drivetrain is mounted opposite the conventional mecanum
+        // translation signs. Invert forward and strafe while preserving rotation.
+        mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
 
-        intakePower = gamepad2.right_trigger - gamepad2.left_trigger;
+        // Right trigger intakes; left trigger reverses the intake to eject.
+        if (gamepad2.right_trigger > 0) {
+            intakePower = gamepad2.right_trigger;
+            intakeServoPower = -gamepad2.right_trigger;
+        } else if (gamepad2.left_trigger > 0) {
+            intakePower = -gamepad2.left_trigger;
+            intakeServoPower = intakePower;
+        } else {
+            intakePower = 0;
+            intakeServoPower = 0;
+        }
         launch();
+        double launcherVelocity = launcher.getVelocity();
+        boolean launcherReady = Math.abs(
+                launcherVelocity - LAUNCHER_TARGET_VELOCITY) <= LAUNCHER_READY_TOLERANCE;
 
-        intake.setPower(intakePower);
+        setIntakePower(intakePower, intakeServoPower);
 
         if (gamepad2.right_bumper) {
+            // Feed inward immediately while the shooter spins up and runs.
             windmillPower = -1;
         } else if (gamepad2.left_bumper) {
             windmillPower = 1;
@@ -115,16 +134,19 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
             windmillPower = 0;
         }
 
-        leftIntakeServo.setPower(windmillPower);
-        rightIntakeServo.setPower(windmillPower);
-        windmillServo.setPower(0);
+        windmillServo.setPower(windmillPower);
 
         telemetry.addData(
                 "Motors", "left (%.2f), right (%.2f)", leftFrontPower, rightFrontPower);
         telemetry.addData(
                 "Triggers", "left (%.2f), right (%.2f)",
                 gamepad2.left_trigger, gamepad2.right_trigger);
-        telemetry.addData("Controls", "BIOBUZZ v4");
+        telemetry.addData("Launcher", "%.0f / %d ticks/s (%s)",
+                launcherVelocity, LAUNCHER_TARGET_VELOCITY,
+                launcherReady ? "READY" : "SPINNING UP");
+        telemetry.addData("Intake motor / servos / windmill", "%.2f / %.2f / %.2f",
+                intakePower, intakeServoPower, windmillPower);
+        telemetry.addData("Controls", "BIOBUZZ v5 - intake ports 0/1 + motor");
     }
 
     private void mecanumDrive(double forward, double strafe, double rotate) {
@@ -148,6 +170,15 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
         rightFrontDrive.setPower(rightFrontPower);
         leftBackDrive.setPower(leftBackPower);
         rightBackDrive.setPower(rightBackPower);
+    }
+
+    /** Run the intake motor and both intake servos together. */
+    private void setIntakePower(double motorPower, double servoPower) {
+        intakePower = motorPower;
+        intakeServoPower = servoPower;
+        intake.setPower(motorPower);
+        leftIntakeServo.setPower(servoPower);
+        rightIntakeServo.setPower(servoPower);
     }
 
     private void launch() {
