@@ -15,7 +15,7 @@
             <ContinuousRotationServo name="left_intake_servo" port="0" />
             <ContinuousRotationServo name="right_intake_servo" port="1" />
             <ContinuousRotationServo name="windmill_servo" port="2" />
-            <ControlHubImuBHI260AP name="imu" port="0" bus="0" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>
 </Robot>

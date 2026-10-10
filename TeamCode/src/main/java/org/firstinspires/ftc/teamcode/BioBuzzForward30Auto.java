@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 
-/** Drives forward 12, right 65, forward 35, then turns right 95 degrees. */
+/** Drives one continuous curved path to x=47, y=-67, heading=-95 degrees. */
 @Autonomous(name = "Jimothy Automonous", group = "StarterBot")
 public class BioBuzzForward30Auto extends LinearOpMode {
     private static final String TAG = "JimothyAuto";
@@ -21,21 +21,19 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double POD_SPACING_INCHES = 12.263;
     private static final double CENTER_POD_X_INCHES = -6.718;
 
-    private static final double TRANSLATION_KP = 0.045;
-    private static final double HEADING_KP = 0.65;
-    private static final double MAX_FORWARD_POWER = 0.35;
-    private static final double MAX_STRAFE_POWER = 0.55;
+    private static final double TRANSLATION_KP = 0.060;
+    private static final double HEADING_KP = 0.80;
+    private static final double MAX_FORWARD_POWER = 0.80;
+    private static final double MAX_STRAFE_POWER = 1.00;
     private static final double MIN_FORWARD_POWER = 0.10;
     private static final double MIN_STRAFE_POWER = 0.16;
     private static final double MIN_TURN_POWER = 0.09;
-    private static final double MAX_TURN_POWER = 0.28;
+    private static final double MAX_TURN_POWER = 0.60;
     private static final double POSITION_TOLERANCE_INCHES = 1.25;
     private static final double HEADING_TOLERANCE_RADIANS = Math.toRadians(2.0);
     private static final double WAYPOINT_TIMEOUT_SECONDS = 22.0;
-    private static final double SHOOTER_VELOCITY = 320.0;
+    private static final double SHOOTER_VELOCITY = 300.0;
     private static final double SHOOTER_SPINUP_SECONDS = 1.0;
-    private static final double MIN_SHOOTER_FEED_VELOCITY = 315.0;
-    private static final double FEED_PULSE_SECONDS = 0.35;
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -87,7 +85,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         stopDrive();
         resetPose();
 
-        telemetry.addLine("Ready: forward 12, right 65, forward 35, right 95");
+        telemetry.addLine("Ready: fast path to X=47, Y=-67, heading=-95");
         telemetry.addLine("Keep the entire path clear");
         addShootingTelemetry();
         telemetry.update();
@@ -97,17 +95,18 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         resetPose();
 
         try {
-            if (!driveToPose(12, 0, 0, "Forward 12")) return;
-            if (!driveToPose(12, -65, 0, "Strafe right 65")) return;
-            if (!driveToPose(47, -65, 0, "Forward 35")) return;
-            if (!driveToPose(47, -65, -95, "Turn right 95")) return;
-            RobotLog.ii(TAG, "Turn complete; spinning up shooter");
-            telemetry.addLine("Turn complete; spinning up shooter");
+            // Bias the curve right early to clear the nearby obstacle. This is a
+            // pass-through waypoint, so the drivetrain does not stop here.
+            if (!driveThroughPose(12, -30, -30, "Curve right early")) return;
+            if (!driveToPose(47, -67, -95, "Fast drive + turn")) return;
+            RobotLog.ii(TAG, "Final pose reached; spinning up shooter");
+            telemetry.addLine("Final pose reached; spinning up shooter");
             addShootingTelemetry();
             telemetry.update();
             startShooter();
             if (!waitForShooterSpinup()) return;
-            shootWithRecovery();
+            runShooterAndWindmill();
+            if (opModeIsActive()) recordPositionMode();
         } finally {
             stopDrive();
             shooter.setVelocity(0);
@@ -148,63 +147,86 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         return true;
     }
 
-    private void shootWithRecovery() {
-        boolean firstBall = true;
-
-        while (opModeIsActive()) {
-            // Preserve the requested one-second initial feed. After that, wait for
-            // the wheel to recover to at least 315 ticks/s before feeding again.
-            if (!firstBall) {
-                shootingState = "WINDMILL WAITING";
-                windmill.setPower(0);
-                while (opModeIsActive()
-                        && shooter.getVelocity() < MIN_SHOOTER_FEED_VELOCITY) {
-                    shooter.setVelocity(SHOOTER_VELOCITY);
-                    telemetry.addData("Step", "Recover shooter before next ball");
-                    telemetry.addData("Shooter velocity", "%.1f ticks/s",
-                            shooter.getVelocity());
-                    telemetry.addData("Target / feed minimum", "%.0f / %.0f ticks/s",
-                            SHOOTER_VELOCITY, MIN_SHOOTER_FEED_VELOCITY);
-                    telemetry.addLine("Windmill: WAITING");
-                    addShootingTelemetry();
-                    telemetry.update();
-                    idle();
-                }
-            }
-
-            if (!opModeIsActive()) break;
-
-            ElapsedTime pulseTimer = new ElapsedTime();
-            shootingState = "WINDMILL FEEDING";
-            windmill.setPower(-1);
-            RobotLog.ii(TAG, "Feeding ball at shooter velocity %.0f",
-                    shooter.getVelocity());
-            while (opModeIsActive()
-                    && pulseTimer.seconds() < FEED_PULSE_SECONDS) {
-                shooter.setVelocity(SHOOTER_VELOCITY);
-                telemetry.addData("Step", "Feed one ball");
-                telemetry.addData("Shooter velocity", "%.1f ticks/s",
-                        shooter.getVelocity());
-                telemetry.addData("Target / feed minimum", "%.0f / %.0f ticks/s",
-                        SHOOTER_VELOCITY, MIN_SHOOTER_FEED_VELOCITY);
-                telemetry.addLine("Windmill: FEEDING");
-                addShootingTelemetry();
-                telemetry.addData("Feed pulse", "%.2f / %.2f sec",
-                        pulseTimer.seconds(), FEED_PULSE_SECONDS);
-                telemetry.update();
-                idle();
-            }
-            windmill.setPower(0);
-            firstBall = false;
+    private void runShooterAndWindmill() {
+        shootingState = "SHOOTER + WINDMILL RUNNING";
+        windmill.setPower(-1);
+        RobotLog.ii(TAG, "Windmill running continuously with shooter");
+        while (opModeIsActive() && !gamepad1.a) {
+            shooter.setVelocity(SHOOTER_VELOCITY);
+            telemetry.addData("Step", "Continuous shooting");
+            telemetry.addLine("Press gamepad 1 A to stop shooting and record a new pose");
+            addShootingTelemetry();
+            telemetry.update();
+            idle();
         }
 
         shooter.setVelocity(0);
         windmill.setPower(0);
-        RobotLog.ii(TAG, "Pulsed shooting stopped with OpMode");
+        RobotLog.ii(TAG, "Continuous shooting stopped");
+    }
+
+    private void recordPositionMode() {
+        shootingState = "OFF - RECORDING POSE";
+        shooter.setVelocity(0);
+        windmill.setPower(0);
+        stopDrive();
+
+        // Wait for the A press used to enter this mode to be released.
+        while (opModeIsActive() && gamepad1.a) idle();
+
+        while (opModeIsActive() && !gamepad1.b) {
+            updatePose();
+
+            // Reduced manual power makes final positioning easier and safer.
+            setMecanum(
+                    gamepad1.left_stick_y * 0.40,
+                    -gamepad1.left_stick_x * 0.40,
+                    -gamepad1.right_stick_x * 0.35);
+
+            telemetry.addData("Mode", "POSITION RECORDER");
+            telemetry.addData("X forward", "%+.2f in", x);
+            telemetry.addData("Y left", "%+.2f in", y);
+            telemetry.addData("Heading CCW", "%+.1f deg", Math.toDegrees(heading));
+            telemetry.addLine("Drive with gamepad 1; press B to capture this pose");
+            addShootingTelemetry();
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        updatePose();
+        RobotLog.ii(TAG, "RECORDED POSE x=%.2f y=%.2f heading=%.1f",
+                x, y, Math.toDegrees(heading));
+
+        while (opModeIsActive()) {
+            telemetry.addData("Mode", "POSE CAPTURED");
+            telemetry.addData("RECORDED X forward", "%+.2f in", x);
+            telemetry.addData("RECORDED Y left", "%+.2f in", y);
+            telemetry.addData("RECORDED heading CCW", "%+.1f deg",
+                    Math.toDegrees(heading));
+            telemetry.addLine("Write down these values, then press STOP");
+            addShootingTelemetry();
+            telemetry.update();
+            idle();
+        }
+    }
+
+    private boolean driveThroughPose(double targetX, double targetY,
+                                     double targetHeadingDegrees, String step) {
+        return driveToPose(targetX, targetY, targetHeadingDegrees, step,
+                4.0, Math.toRadians(10.0), false);
     }
 
     private boolean driveToPose(double targetX, double targetY,
                                 double targetHeadingDegrees, String step) {
+        return driveToPose(targetX, targetY, targetHeadingDegrees, step,
+                POSITION_TOLERANCE_INCHES, HEADING_TOLERANCE_RADIANS, true);
+    }
+
+    private boolean driveToPose(double targetX, double targetY,
+                                double targetHeadingDegrees, String step,
+                                double positionTolerance, double headingTolerance,
+                                boolean stopAtTarget) {
         ElapsedTime timer = new ElapsedTime();
         double targetHeading = Math.toRadians(targetHeadingDegrees);
 
@@ -215,9 +237,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             double positionError = Math.hypot(errorX, errorY);
             double headingError = normalizeRadians(targetHeading - heading);
 
-            if (positionError <= POSITION_TOLERANCE_INCHES
-                    && Math.abs(headingError) <= HEADING_TOLERANCE_RADIANS) {
-                stopDrive();
+            if (positionError <= positionTolerance
+                    && Math.abs(headingError) <= headingTolerance) {
+                if (stopAtTarget) stopDrive();
                 return true;
             }
 
@@ -269,8 +291,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         telemetry.addData("Shooting state", shootingState);
         telemetry.addData("Actual shooter speed", "%.1f ticks/s", shooter.getVelocity());
         telemetry.addData("Shooter target", "%.0f ticks/s", SHOOTER_VELOCITY);
-        telemetry.addData("Windmill feed minimum", "%.0f ticks/s",
-                MIN_SHOOTER_FEED_VELOCITY);
     }
 
     private double minimumPower(double power, double minimum, double error) {
