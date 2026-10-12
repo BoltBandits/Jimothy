@@ -7,6 +7,12 @@ apply plugin: 'com.android.library'
 
 android {
 
+    // The SDK 11.1 sample sources use the pre-12.0 AprilTag API. Team op modes live
+    // in TeamCode, so omit those disabled examples when building against SDK 12.
+    sourceSets {
+        main.java.exclude 'org/firstinspires/ftc/robotcontroller/external/samples/**'
+    }
+
     defaultConfig {
         minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion

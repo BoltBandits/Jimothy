@@ -21,19 +21,40 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double POD_SPACING_INCHES = 12.263;
     private static final double CENTER_POD_X_INCHES = -6.718;
 
-    private static final double TRANSLATION_KP = 0.060;
-    private static final double HEADING_KP = 0.80;
-    private static final double MAX_FORWARD_POWER = 0.80;
+    private static final double TRANSLATION_KP = 0.075;
+    private static final double HEADING_KP = 0.90;
+    private static final double MAX_FORWARD_POWER = 1.00;
     private static final double MAX_STRAFE_POWER = 1.00;
     private static final double MIN_FORWARD_POWER = 0.10;
     private static final double MIN_STRAFE_POWER = 0.16;
     private static final double MIN_TURN_POWER = 0.09;
-    private static final double MAX_TURN_POWER = 0.60;
+    private static final double MAX_TURN_POWER = 0.70;
     private static final double POSITION_TOLERANCE_INCHES = 1.25;
     private static final double HEADING_TOLERANCE_RADIANS = Math.toRadians(2.0);
     private static final double WAYPOINT_TIMEOUT_SECONDS = 22.0;
-    private static final double SHOOTER_VELOCITY = 300.0;
-    private static final double SHOOTER_SPINUP_SECONDS = 1.0;
+    private static final double BOOST_SHOOTER_VELOCITY = 315.0;
+    private static final double NORMAL_SHOOTER_VELOCITY = 300.0;
+    private static final double SHOOTER_BOOST_FRACTION = 0.75;
+    private static final double SHOOTER_SPINUP_SECONDS = 2.0;
+    private static final double SHOOTING_SECONDS = 4.5;
+    private static final double AFTER_SHOOTING_X_INCHES = 2.67;
+    private static final double AFTER_SHOOTING_Y_INCHES = -71.16;
+    private static final double AFTER_SHOOTING_HEADING_DEGREES = -86.4;
+    private static final double CLEARANCE_DISTANCE_INCHES = 6.0;
+    private static final double INTAKE_APPROACH_RIGHT_INCHES = 3.0;
+    private static final double INTAKE_FORWARD_POWER = 0.30;
+    private static final double INTAKE_AFTER_DRIVE_SECONDS = 1.0;
+    private static final double FINAL_X_INCHES = 19.23;
+    private static final double FINAL_Y_INCHES = 13.53;
+    private static final double FINAL_HEADING_DEGREES = -120.7;
+    private static final double SECOND_FINAL_X_INCHES = 49.67;
+    private static final double SECOND_FINAL_Y_INCHES = 46.26;
+    private static final double SECOND_FINAL_HEADING_DEGREES = 96.8;
+    private static final double SECOND_SHOOTING_HEADING_DEGREES = 76.8;
+    private static final double SECOND_SHOOTING_SECONDS = 4.0;
+    private static final double PARK_X_INCHES = -8.22;
+    private static final double PARK_Y_INCHES = 14.07;
+    private static final double PARK_HEADING_DEGREES = 112.6;
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -44,6 +65,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private DcMotor centerPod;
     private DcMotorEx shooter;
     private CRServo windmill;
+    private CRServo leftIntakeServo;
+    private CRServo rightIntakeServo;
 
     private int previousLeft;
     private int previousRight;
@@ -52,6 +75,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private double y;
     private double heading;
     private String shootingState = "IDLE";
+    private double shooterTargetVelocity = BOOST_SHOOTER_VELOCITY;
 
     @Override
     public void runOpMode() {
@@ -64,6 +88,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         centerPod = hardwareMap.get(DcMotor.class, "odo_center");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter_motor");
         windmill = hardwareMap.get(CRServo.class, "windmill_servo");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -82,6 +108,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         shooter.setVelocity(0);
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
         windmill.setPower(0);
+        rightIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftIntakeServo.setPower(0);
+        rightIntakeServo.setPower(0);
         stopDrive();
         resetPose();
 
@@ -98,17 +127,67 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             // Bias the curve right early to clear the nearby obstacle. This is a
             // pass-through waypoint, so the drivetrain does not stop here.
             if (!driveThroughPose(12, -30, -30, "Curve right early")) return;
-            if (!driveToPose(47, -67, -95, "Fast drive + turn")) return;
+            if (!driveToPose(47, -67, -95, "Fast drive + turn",
+                    2.25, Math.toRadians(3.5), true)) return;
             RobotLog.ii(TAG, "Final pose reached; spinning up shooter");
             telemetry.addLine("Final pose reached; spinning up shooter");
             addShootingTelemetry();
             telemetry.update();
-            startShooter();
+            startShooter(BOOST_SHOOTER_VELOCITY);
             if (!waitForShooterSpinup()) return;
             runShooterAndWindmill();
-            if (opModeIsActive()) recordPositionMode();
+            if (opModeIsActive()) {
+                shootingState = "OFF - DRIVING AFTER SHOOTING";
+                double backHeadingDegrees = Math.toDegrees(heading);
+                double backX = x - CLEARANCE_DISTANCE_INCHES * Math.cos(heading);
+                double backY = y - CLEARANCE_DISTANCE_INCHES * Math.sin(heading);
+                if (!driveToPose(backX, backY, backHeadingDegrees,
+                        "Back 6 inches after shooting")) return;
+
+                double finalHeading = Math.toRadians(AFTER_SHOOTING_HEADING_DEGREES);
+                double beforeForwardX = AFTER_SHOOTING_X_INCHES
+                        - CLEARANCE_DISTANCE_INCHES * Math.cos(finalHeading)
+                        + INTAKE_APPROACH_RIGHT_INCHES * Math.sin(finalHeading);
+                double beforeForwardY = AFTER_SHOOTING_Y_INCHES
+                        - CLEARANCE_DISTANCE_INCHES * Math.sin(finalHeading)
+                        - INTAKE_APPROACH_RIGHT_INCHES * Math.cos(finalHeading);
+                if (!driveToPose(beforeForwardX,
+                        beforeForwardY,
+                        AFTER_SHOOTING_HEADING_DEGREES,
+                        "Strafe after shooting",
+                        2.25, Math.toRadians(3.5), true)) return;
+
+                if (!driveForwardWithIntake(CLEARANCE_DISTANCE_INCHES)) return;
+                x = AFTER_SHOOTING_X_INCHES
+                        + INTAKE_APPROACH_RIGHT_INCHES * Math.sin(finalHeading);
+                y = AFTER_SHOOTING_Y_INCHES
+                        - INTAKE_APPROACH_RIGHT_INCHES * Math.cos(finalHeading);
+                heading = finalHeading;
+                syncPodBaselines();
+                if (!driveToPose(FINAL_X_INCHES,
+                        FINAL_Y_INCHES,
+                        FINAL_HEADING_DEGREES,
+                        "Drive to final pose")) return;
+                startShooter(BOOST_SHOOTER_VELOCITY);
+                if (!driveToPose(SECOND_FINAL_X_INCHES,
+                        SECOND_FINAL_Y_INCHES,
+                        SECOND_FINAL_HEADING_DEGREES,
+                        "Drive to second pose - shooter spinning")) return;
+
+                if (!driveToPose(SECOND_FINAL_X_INCHES,
+                        SECOND_FINAL_Y_INCHES,
+                        SECOND_SHOOTING_HEADING_DEGREES,
+                        "Turn right 20 degrees - shooter spinning")) return;
+                if (!runSecondShootingCycle()) return;
+                if (!driveToPose(PARK_X_INCHES,
+                        PARK_Y_INCHES,
+                        PARK_HEADING_DEGREES,
+                        "Fast drive to park",
+                        3.0, Math.toRadians(5.0), true)) return;
+            }
         } finally {
             stopDrive();
+            stopIntake();
             shooter.setVelocity(0);
             windmill.setPower(0);
             shootingState = "STOPPED";
@@ -121,20 +200,21 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         sleep(1000);
     }
 
-    private void startShooter() {
+    private void startShooter(double targetVelocity) {
         shootingState = "SHOOTER SPIN-UP";
-        shooter.setVelocity(SHOOTER_VELOCITY);
+        shooterTargetVelocity = targetVelocity;
+        shooter.setVelocity(shooterTargetVelocity);
         RobotLog.ii(TAG, "Shooter spin-up started");
     }
 
     private boolean waitForShooterSpinup() {
         ElapsedTime spinupTimer = new ElapsedTime();
         while (opModeIsActive() && spinupTimer.seconds() < SHOOTER_SPINUP_SECONDS) {
-            shooter.setVelocity(SHOOTER_VELOCITY);
-            double velocity = shooter.getVelocity();
-            telemetry.addData("Step", "One-second shooter spin-up");
+            shooter.setVelocity(shooterTargetVelocity);
+            double velocity = Math.abs(shooter.getVelocity());
+            telemetry.addData("Step", "Shooter spin-up");
             telemetry.addData("Shooter", "%.0f / %.0f ticks/s",
-                    velocity, SHOOTER_VELOCITY);
+                    velocity, shooterTargetVelocity);
             telemetry.addData("Spin-up time", "%.1f / %.1f sec",
                     spinupTimer.seconds(), SHOOTER_SPINUP_SECONDS);
             addShootingTelemetry();
@@ -142,19 +222,24 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             idle();
         }
         if (!opModeIsActive()) return false;
-        RobotLog.ii(TAG, "One-second spin-up complete at %.0f ticks/s",
-                shooter.getVelocity());
+        RobotLog.ii(TAG, "%.1f-second spin-up complete at %.0f ticks/s",
+                SHOOTER_SPINUP_SECONDS, Math.abs(shooter.getVelocity()));
         return true;
     }
 
     private void runShooterAndWindmill() {
         shootingState = "SHOOTER + WINDMILL RUNNING";
         windmill.setPower(-1);
+        ElapsedTime shootingTimer = new ElapsedTime();
         RobotLog.ii(TAG, "Windmill running continuously with shooter");
-        while (opModeIsActive() && !gamepad1.a) {
-            shooter.setVelocity(SHOOTER_VELOCITY);
+        while (opModeIsActive() && shootingTimer.seconds() < SHOOTING_SECONDS) {
+            shooterTargetVelocity = shootingTimer.seconds()
+                    < SHOOTING_SECONDS * SHOOTER_BOOST_FRACTION
+                    ? BOOST_SHOOTER_VELOCITY : NORMAL_SHOOTER_VELOCITY;
+            shooter.setVelocity(shooterTargetVelocity);
             telemetry.addData("Step", "Continuous shooting");
-            telemetry.addLine("Press gamepad 1 A to stop shooting and record a new pose");
+            telemetry.addData("Shooting time", "%.1f / %.1f sec",
+                    shootingTimer.seconds(), SHOOTING_SECONDS);
             addShootingTelemetry();
             telemetry.update();
             idle();
@@ -163,6 +248,31 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         shooter.setVelocity(0);
         windmill.setPower(0);
         RobotLog.ii(TAG, "Continuous shooting stopped");
+    }
+
+    private boolean runSecondShootingCycle() {
+        shootingState = "SECOND SHOOTING CYCLE";
+        windmill.setPower(-1);
+        ElapsedTime timer = new ElapsedTime();
+
+        while (opModeIsActive() && timer.seconds() < SECOND_SHOOTING_SECONDS) {
+            shooterTargetVelocity = timer.seconds()
+                    < SECOND_SHOOTING_SECONDS * SHOOTER_BOOST_FRACTION
+                    ? BOOST_SHOOTER_VELOCITY : NORMAL_SHOOTER_VELOCITY;
+            shooter.setVelocity(shooterTargetVelocity);
+            telemetry.addData("Step", "Second shooting cycle");
+            telemetry.addData("Shooting time", "%.1f / %.1f sec",
+                    timer.seconds(), SECOND_SHOOTING_SECONDS);
+            addShootingTelemetry();
+            telemetry.update();
+            idle();
+        }
+
+        shooter.setVelocity(0);
+        windmill.setPower(0);
+        shootingState = "SECOND SHOOTING COMPLETE";
+        RobotLog.ii(TAG, "Second four-second shooting cycle complete");
+        return true;
     }
 
     private void recordPositionMode() {
@@ -215,6 +325,53 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                                      double targetHeadingDegrees, String step) {
         return driveToPose(targetX, targetY, targetHeadingDegrees, step,
                 4.0, Math.toRadians(10.0), false);
+    }
+
+    private boolean driveForwardWithIntake(double distanceInches) {
+        int startingRightTicks = readRight();
+        ElapsedTime timer = new ElapsedTime();
+        leftPod.setPower(1.0);
+        leftIntakeServo.setPower(-1.0);
+        rightIntakeServo.setPower(-1.0);
+
+        while (opModeIsActive() && timer.seconds() < 5.0) {
+            double distanceTraveled =
+                    (readRight() - startingRightTicks) / RIGHT_TICKS_PER_INCH;
+            if (distanceTraveled >= distanceInches) {
+                stopDrive();
+                ElapsedTime intakeTimer = new ElapsedTime();
+                while (opModeIsActive()
+                        && intakeTimer.seconds() < INTAKE_AFTER_DRIVE_SECONDS) {
+                    telemetry.addData("Step", "Stopped; intake still running");
+                    telemetry.addData("Intake time", "%.1f / %.1f sec",
+                            intakeTimer.seconds(), INTAKE_AFTER_DRIVE_SECONDS);
+                    telemetry.update();
+                    idle();
+                }
+                stopIntake();
+                return opModeIsActive();
+            }
+
+            // This drivetrain requires negative motor mix for physical forward.
+            setMecanum(-INTAKE_FORWARD_POWER, 0, 0);
+            telemetry.addData("Step", "Forward %.0f inches with intake", distanceInches);
+            telemetry.addData("Distance", "%.1f / %.1f in",
+                    distanceTraveled, distanceInches);
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        stopIntake();
+        telemetry.addLine("Timed out driving forward with intake");
+        telemetry.update();
+        return false;
+    }
+
+    private void stopIntake() {
+        leftPod.setPower(0);
+        leftIntakeServo.setPower(0);
+        rightIntakeServo.setPower(0);
     }
 
     private boolean driveToPose(double targetX, double targetY,
@@ -289,8 +446,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     private void addShootingTelemetry() {
         telemetry.addData("Shooting state", shootingState);
-        telemetry.addData("Actual shooter speed", "%.1f ticks/s", shooter.getVelocity());
-        telemetry.addData("Shooter target", "%.0f ticks/s", SHOOTER_VELOCITY);
+        telemetry.addData("Actual shooter speed", "%.1f ticks/s",
+                Math.abs(shooter.getVelocity()));
+        telemetry.addData("Shooter target", "%.0f ticks/s", shooterTargetVelocity);
     }
 
     private double minimumPower(double power, double minimum, double error) {
@@ -321,12 +479,16 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     }
 
     private void resetPose() {
-        previousLeft = readLeft();
-        previousRight = readRight();
-        previousCenter = readCenter();
+        syncPodBaselines();
         x = 0;
         y = 0;
         heading = 0;
+    }
+
+    private void syncPodBaselines() {
+        previousLeft = readLeft();
+        previousRight = readRight();
+        previousCenter = readCenter();
     }
 
     private void prepareDriveMotor(DcMotor motor) {
