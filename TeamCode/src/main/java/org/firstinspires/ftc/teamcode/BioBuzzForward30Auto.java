@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -27,14 +28,14 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double MAX_STRAFE_POWER = 1.00;
     private static final double MIN_FORWARD_POWER = 0.10;
     private static final double MIN_STRAFE_POWER = 0.16;
-    private static final double MIN_TURN_POWER = 0.09;
+    // Enough authority to overcome drivetrain static friction during final
+    // heading corrections without changing any pose target or tolerance.
+    private static final double MIN_TURN_POWER = 0.19;
     private static final double MAX_TURN_POWER = 0.70;
     private static final double POSITION_TOLERANCE_INCHES = 1.25;
     private static final double HEADING_TOLERANCE_RADIANS = Math.toRadians(2.0);
     private static final double WAYPOINT_TIMEOUT_SECONDS = 22.0;
     private static final double BOOST_SHOOTER_VELOCITY = 315.0;
-    private static final double NORMAL_SHOOTER_VELOCITY = 300.0;
-    private static final double SHOOTER_BOOST_FRACTION = 0.75;
     private static final double SHOOTER_SPINUP_SECONDS = 2.0;
     private static final double SHOOTING_SECONDS = 4.5;
     private static final double AFTER_SHOOTING_X_INCHES = 2.67;
@@ -55,6 +56,12 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double PARK_X_INCHES = -8.22;
     private static final double PARK_Y_INCHES = 14.07;
     private static final double PARK_HEADING_DEGREES = 112.6;
+    private static final double SHOOTER_P = 40.0;
+    // Slightly stronger baseline to recover speed under ball load; voltage
+    // compensation scales this value for the current battery level.
+    private static final double SHOOTER_BASE_F = 13.8;
+    private static final double NOMINAL_BATTERY_VOLTAGE = 12.0;
+    private static final double VOLTAGE_UPDATE_SECONDS = 0.5;
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -76,6 +83,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private double heading;
     private String shootingState = "IDLE";
     private double shooterTargetVelocity = BOOST_SHOOTER_VELOCITY;
+    private double batteryVoltage = NOMINAL_BATTERY_VOLTAGE;
+    private double compensatedShooterF = SHOOTER_BASE_F;
 
     @Override
     public void runOpMode() {
@@ -103,8 +112,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         preparePod(rightPod);
         preparePod(centerPod);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(40, 0, 0, 12.5));
+        updateShooterVoltageCompensation();
         shooter.setVelocity(0);
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
         windmill.setPower(0);
@@ -172,7 +180,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!driveToPose(SECOND_FINAL_X_INCHES,
                         SECOND_FINAL_Y_INCHES,
                         SECOND_FINAL_HEADING_DEGREES,
-                        "Drive to second pose - shooter spinning")) return;
+                        "Drive to second pose - shooter spinning",
+                        2.25, Math.toRadians(3.5), true)) return;
 
                 if (!driveToPose(SECOND_FINAL_X_INCHES,
                         SECOND_FINAL_Y_INCHES,
@@ -203,6 +212,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private void startShooter(double targetVelocity) {
         shootingState = "SHOOTER SPIN-UP";
         shooterTargetVelocity = targetVelocity;
+        updateShooterVoltageCompensation();
         shooter.setVelocity(shooterTargetVelocity);
         RobotLog.ii(TAG, "Shooter spin-up started");
     }
@@ -231,11 +241,16 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         shootingState = "SHOOTER + WINDMILL RUNNING";
         windmill.setPower(-1);
         ElapsedTime shootingTimer = new ElapsedTime();
+        ElapsedTime voltageTimer = new ElapsedTime();
         RobotLog.ii(TAG, "Windmill running continuously with shooter");
         while (opModeIsActive() && shootingTimer.seconds() < SHOOTING_SECONDS) {
-            shooterTargetVelocity = shootingTimer.seconds()
-                    < SHOOTING_SECONDS * SHOOTER_BOOST_FRACTION
-                    ? BOOST_SHOOTER_VELOCITY : NORMAL_SHOOTER_VELOCITY;
+            if (voltageTimer.seconds() >= VOLTAGE_UPDATE_SECONDS) {
+                updateShooterVoltageCompensation();
+                voltageTimer.reset();
+            }
+            // Hold one velocity for every ball; do not reduce the target late
+            // in the cycle while the windmill is still feeding.
+            shooterTargetVelocity = BOOST_SHOOTER_VELOCITY;
             shooter.setVelocity(shooterTargetVelocity);
             telemetry.addData("Step", "Continuous shooting");
             telemetry.addData("Shooting time", "%.1f / %.1f sec",
@@ -254,11 +269,15 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         shootingState = "SECOND SHOOTING CYCLE";
         windmill.setPower(-1);
         ElapsedTime timer = new ElapsedTime();
+        ElapsedTime voltageTimer = new ElapsedTime();
 
         while (opModeIsActive() && timer.seconds() < SECOND_SHOOTING_SECONDS) {
-            shooterTargetVelocity = timer.seconds()
-                    < SECOND_SHOOTING_SECONDS * SHOOTER_BOOST_FRACTION
-                    ? BOOST_SHOOTER_VELOCITY : NORMAL_SHOOTER_VELOCITY;
+            holdSecondShootingPose();
+            if (voltageTimer.seconds() >= VOLTAGE_UPDATE_SECONDS) {
+                updateShooterVoltageCompensation();
+                voltageTimer.reset();
+            }
+            shooterTargetVelocity = BOOST_SHOOTER_VELOCITY;
             shooter.setVelocity(shooterTargetVelocity);
             telemetry.addData("Step", "Second shooting cycle");
             telemetry.addData("Shooting time", "%.1f / %.1f sec",
@@ -270,9 +289,53 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
         shooter.setVelocity(0);
         windmill.setPower(0);
+        stopDrive();
         shootingState = "SECOND SHOOTING COMPLETE";
         RobotLog.ii(TAG, "Second four-second shooting cycle complete");
         return true;
+    }
+
+    private void holdSecondShootingPose() {
+        updatePose();
+        double targetHeading = Math.toRadians(SECOND_SHOOTING_HEADING_DEGREES);
+        double errorX = SECOND_FINAL_X_INCHES - x;
+        double errorY = SECOND_FINAL_Y_INCHES - y;
+        double positionError = Math.hypot(errorX, errorY);
+        double headingError = normalizeRadians(targetHeading - heading);
+
+        double forward = 0;
+        double left = 0;
+        if (positionError > POSITION_TOLERANCE_INCHES) {
+            double cos = Math.cos(heading);
+            double sin = Math.sin(heading);
+            double robotForwardError = errorX * cos + errorY * sin;
+            double robotLeftError = -errorX * sin + errorY * cos;
+            if (Math.abs(robotForwardError) > 0.75) {
+                forward = minimumPower(
+                        Range.clip(robotForwardError * TRANSLATION_KP, -0.25, 0.25),
+                        MIN_FORWARD_POWER, robotForwardError);
+            }
+            if (Math.abs(robotLeftError) > 0.75) {
+                left = minimumPower(
+                        Range.clip(robotLeftError * TRANSLATION_KP, -0.30, 0.30),
+                        MIN_STRAFE_POWER, robotLeftError);
+            }
+        }
+
+        double turn = 0;
+        if (Math.abs(headingError) > HEADING_TOLERANCE_RADIANS) {
+            turn = Range.clip(headingError * HEADING_KP, -0.30, 0.30);
+            if (Math.abs(turn) < MIN_TURN_POWER) {
+                turn = Math.copySign(MIN_TURN_POWER, turn);
+            }
+        }
+
+        // Jimothy uses negative motor mix for physical forward.
+        setMecanum(-forward, left, turn);
+        telemetry.addData("Shooting pose error", "%.2f in / %+.1f deg",
+                positionError, Math.toDegrees(headingError));
+        telemetry.addData("Pose correction", "%s",
+                forward == 0 && left == 0 && turn == 0 ? "HOLDING" : "CORRECTING");
     }
 
     private void recordPositionMode() {
@@ -418,7 +481,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
             if (Math.abs(robotForwardError) < 0.75) forward = 0;
             if (Math.abs(robotLeftError) < 0.75) left = 0;
-            if (Math.abs(headingError) <= HEADING_TOLERANCE_RADIANS) {
+            if (Math.abs(headingError) <= headingTolerance) {
                 turn = 0;
             } else if (Math.abs(turn) < MIN_TURN_POWER) {
                 turn = Math.copySign(MIN_TURN_POWER, turn);
@@ -432,6 +495,13 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             telemetry.addData("Target heading", "%.0f deg", targetHeadingDegrees);
             telemetry.addData("Pose X / Y", "%+.1f / %+.1f in", x, y);
             telemetry.addData("Heading", "%+.1f deg", Math.toDegrees(heading));
+            telemetry.addData("Position error", "%.2f in", positionError);
+            telemetry.addData("Heading error", "%+.1f deg",
+                    Math.toDegrees(headingError));
+            telemetry.addData("Waypoint time", "%.1f / %.1f sec",
+                    timer.seconds(), WAYPOINT_TIMEOUT_SECONDS);
+            telemetry.addData("Drive command F / L / T", "%+.2f / %+.2f / %+.2f",
+                    forward, left, turn);
             addShootingTelemetry();
             telemetry.update();
             idle();
@@ -449,6 +519,27 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         telemetry.addData("Actual shooter speed", "%.1f ticks/s",
                 Math.abs(shooter.getVelocity()));
         telemetry.addData("Shooter target", "%.0f ticks/s", shooterTargetVelocity);
+        telemetry.addData("Battery voltage", "%.2f V", batteryVoltage);
+        telemetry.addData("Voltage-compensated F", "%.2f", compensatedShooterF);
+    }
+
+    private void updateShooterVoltageCompensation() {
+        double measuredVoltage = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) measuredVoltage = Math.min(measuredVoltage, voltage);
+        }
+        if (measuredVoltage == Double.POSITIVE_INFINITY) {
+            measuredVoltage = NOMINAL_BATTERY_VOLTAGE;
+        }
+
+        batteryVoltage = measuredVoltage;
+        // Prevent a bad sensor reading from producing an unsafe feed-forward value.
+        double safeVoltage = Range.clip(batteryVoltage, 9.0, 14.0);
+        compensatedShooterF = SHOOTER_BASE_F
+                * NOMINAL_BATTERY_VOLTAGE / safeVoltage;
+        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(SHOOTER_P, 0, 0, compensatedShooterF));
     }
 
     private double minimumPower(double power, double minimum, double error) {
