@@ -184,8 +184,8 @@ public class BioBuzzOdometryAutoTest extends LinearOpMode {
                     physicalCcw = Math.copySign(MIN_TURN_POWER, physicalCcw);
                 }
 
-                // This robot's mecanum mix uses negative power for physical forward.
-                setMecanum(-physicalForward, physicalLeft, physicalCcw);
+                // Map pose-controller commands to the updated drivetrain mounting.
+                setMecanum(physicalForward, -physicalLeft, -physicalCcw);
             }
 
             showTelemetry(label, targetX, targetY, targetHeadingDegrees, timeout.seconds());

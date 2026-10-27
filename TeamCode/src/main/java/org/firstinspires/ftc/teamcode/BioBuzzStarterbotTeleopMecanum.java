@@ -83,6 +83,10 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
         leftBackDrive.setZeroPowerBehavior(BRAKE);
         rightBackDrive.setZeroPowerBehavior(BRAKE);
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(BRAKE);
 
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -101,9 +105,9 @@ public class BioBuzzStarterbotTeleopMecanum extends OpMode {
 
     @Override
     public void loop() {
-        // This robot's drivetrain is mounted opposite the conventional mecanum
-        // translation signs. Invert forward and strafe while preserving rotation.
-        mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        // Match all three driver commands to the updated drivetrain mounting.
+        mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x,
+                gamepad1.right_stick_x);
 
         // Right trigger intakes; left trigger reverses the intake to eject.
         if (gamepad2.right_trigger > 0) {

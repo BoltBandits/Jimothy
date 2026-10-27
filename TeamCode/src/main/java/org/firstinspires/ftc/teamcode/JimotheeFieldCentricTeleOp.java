@@ -107,7 +107,7 @@ public class JimotheeFieldCentricTeleOp extends LinearOpMode {
                 updateOdometryHeading(intakePower != 0);
                 double fieldForward = applyDeadZone(-gamepad1.left_stick_y);
                 double fieldLeft = applyDeadZone(-gamepad1.left_stick_x);
-                double ccw = applyDeadZone(-gamepad1.right_stick_x);
+                double ccw = applyDeadZone(gamepad1.right_stick_x);
 
                 // Rotate the field-frame command into the robot frame.
                 double cos = Math.cos(heading);
@@ -116,8 +116,8 @@ public class JimotheeFieldCentricTeleOp extends LinearOpMode {
                 double robotLeft = -fieldForward * sin + fieldLeft * cos;
                 double scale = gamepad1.left_bumper ? SLOW_SCALE : NORMAL_SCALE;
 
-                // Jimothee requires negative mecanum mix for physical forward.
-                setMecanum(-robotForward * scale, robotLeft * scale, ccw * scale);
+                // Updated Jimothee drivetrain translation convention.
+                setMecanum(robotForward * scale, -robotLeft * scale, ccw * scale);
 
                 leftPod.setPower(intakePower);
                 leftIntakeServo.setPower(intakeServoPower);

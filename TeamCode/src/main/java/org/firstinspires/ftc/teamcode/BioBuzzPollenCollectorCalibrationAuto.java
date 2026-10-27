@@ -149,9 +149,8 @@ public class BioBuzzPollenCollectorCalibrationAuto extends LinearOpMode {
                             : "SEARCHING - STOPPED";
                 }
 
-                // This drivetrain's configured motor directions require negative mix
-                // for physical forward, matching the existing Jimothy autonomous.
-                setMecanum(-forward, turn);
+                // The updated drivetrain uses positive mix for physical forward.
+                setMecanum(forward, -turn);
                 showTelemetry(state, result, pollen, estimatedDistance,
                         correctedBearing, forward, turn);
                 logSample(state, result, pollen, estimatedDistance,
