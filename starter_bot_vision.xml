@@ -4,8 +4,8 @@
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="intake_motor" port="0" />
             <goBILDA5202SeriesMotor name="shooter_motor" port="1" />
-            <Motor name="odo_right" port="2" />
-            <Motor name="odo_center" port="3" />
+            <Motor name="odo_center" port="2" />
+            <Motor name="odo_right" port="3" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <goBILDA5202SeriesMotor name="left_front_drive" port="0" />
@@ -18,6 +18,6 @@
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>
-    <Webcam name="Webcam 1" serialNumber="AE357F40" />
+    <Webcam name="Webcam 1" serialNumber="SN0001" />
     <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.1" ipAddress="172.29.0.1" />
 </Robot>

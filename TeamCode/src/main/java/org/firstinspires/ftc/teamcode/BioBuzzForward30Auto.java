@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** Drives one continuous curved path to x=47, y=-67, heading=-95 degrees. */
-@Autonomous(name = "Jimothy Automonous", group = "StarterBot")
+@Autonomous(name = "Red Autonomous Mode", group = "Jimothy")
 public class BioBuzzForward30Auto extends LinearOpMode {
     private static final String TAG = "JimothyAuto";
     private static final int LIMELIGHT_PIPELINE = 0;
@@ -72,16 +72,27 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double POSITION_TOLERANCE_INCHES = 1.25;
     private static final double HEADING_TOLERANCE_RADIANS = Math.toRadians(2.0);
     private static final double WAYPOINT_TIMEOUT_SECONDS = 22.0;
-    // BIOBUZZ StarterBot launcher speed: 1250 ticks/s is about 2678 RPM
-    // with the launcher's 28-tick motor encoder.
-    private static final double SHOOTER_VELOCITY = 1250.0;
-    private static final double SHOOTER_READY_VELOCITY = 1200.0;
+    // Slightly faster opening shot; wait until nearly at target before feeding.
+    private static final double SHOOTER_VELOCITY = 1340.0;
+    private static final double SHOOTER_READY_VELOCITY = 1320.0;
     private static final double SHOOTER_SPINUP_TIMEOUT_SECONDS = 3.0;
     private static final double SHOOTING_SECONDS = 3.5;
+    // Measured from the audience-side shooting origin during the pushed
+    // calibration run. Keep the robot in its starting orientation.
+    private static final double RED_INTAKE_WAYPOINT_1_X_INCHES = -11.12;
+    private static final double RED_INTAKE_WAYPOINT_1_Y_INCHES = -12.89;
+    private static final double RED_INTAKE_WAYPOINT_2_X_INCHES = -8.94;
+    private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.86;
+    private static final double RED_INTAKE_X_INCHES = -3.10;
+    private static final double RED_INTAKE_Y_INCHES = -41.00;
+    private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
+    private static final double RED_INTAKE_FINAL_FORWARD_SECONDS = 3.0;
     private static final double AFTER_SHOOTING_HEADING_DEGREES = -86.4;
     private static final double BACK_AFTER_SHOOTING_INCHES = 6.0;
-    private static final double STRAFE_AFTER_SHOOTING_RIGHT_INCHES = 41.0;
-    private static final double LONG_STRAFE_TIMEOUT_SECONDS = 8.0;
+    // Restored original left-side collection approach after the first shot.
+    private static final double AFTER_SHOOTING_X_INCHES = 2.67;
+    private static final double AFTER_SHOOTING_Y_INCHES = -71.16;
+    private static final double INTAKE_APPROACH_RIGHT_INCHES = 3.0;
     private static final double INTAKE_FORWARD_DISTANCE_INCHES = 6.7;
     private static final double INTAKE_FORWARD_TOLERANCE_INCHES = 0.25;
     private static final double INTAKE_FORWARD_POWER = 0.60;
@@ -191,8 +202,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         stopDrive();
         resetPose();
 
-        telemetry.addLine("Ready: fast path to X=47, Y=-67, heading=-95");
-        telemetry.addLine("Keep the entire path clear");
+        telemetry.addLine("Red Auto: start pose is X=0, Y=0, heading=0");
+        telemetry.addLine("Shoots 3.5 seconds, then push robot and press B to record");
         addShootingTelemetry();
         telemetry.update();
 
@@ -208,94 +219,35 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         // Spin from the start and keep the velocity command active throughout
         // autonomous so the windmill never begins feeding a cold shooter.
         startShooter(SHOOTER_VELOCITY);
-        // Run the intake for the entire autonomous. Loose pollen can otherwise
-        // wedge beneath the collector before the programmed collection step.
-        startIntake();
-        RobotLog.ii(TAG, "INTAKE_START id=%s continuous_from_start=true", runId);
-
         try {
-            // Bias the curve right early to clear the nearby obstacle. This is a
-            // pass-through waypoint, so the drivetrain does not stop here.
-            if (!driveThroughPose(12, -30, -30, "Curve right early")) return;
-            if (!driveToPose(47, -67, -95, "Fast drive + turn",
-                    2.50, Math.toRadians(4.5), true)) return;
-            RobotLog.ii(TAG, "Final pose reached; verifying shooter speed");
-            telemetry.addLine("Final pose reached; verifying shooter speed");
+            RobotLog.ii(TAG, "Opening shot at starting pose; verifying shooter speed");
+            telemetry.addLine("Opening shot at starting pose; verifying shooter speed");
             addShootingTelemetry();
             telemetry.update();
             if (!waitForShooterSpinup()) return;
             runShooterAndWindmill();
             if (opModeIsActive()) {
-                shootingState = "SHOOTER RUNNING - DRIVING AFTER SHOOTING";
-                double backHeadingDegrees = Math.toDegrees(heading);
-                double backX = x - BACK_AFTER_SHOOTING_INCHES * Math.cos(heading);
-                double backY = y - BACK_AFTER_SHOOTING_INCHES * Math.sin(heading);
-                if (!driveToPose(backX, backY, backHeadingDegrees,
-                        "Back 6 inches after shooting")) return;
-
-                // Set the heading before measuring the long strafe. Combining
-                // this turn with the strafe produced a different arc and amount
-                // of wheel slip from run to run.
-                if (!driveToPose(x,
-                        y,
-                        AFTER_SHOOTING_HEADING_DEGREES,
-                        "Turn to 41-inch strafe heading")) return;
-
-                double finalHeading = Math.toRadians(AFTER_SHOOTING_HEADING_DEGREES);
-                double afterStrafeX = x
-                        + STRAFE_AFTER_SHOOTING_RIGHT_INCHES * Math.sin(finalHeading);
-                double afterStrafeY = y
-                        - STRAFE_AFTER_SHOOTING_RIGHT_INCHES * Math.cos(finalHeading);
-                if (!driveToPose(afterStrafeX,
-                        afterStrafeY,
-                        AFTER_SHOOTING_HEADING_DEGREES,
-                        "Strafe right 41 inches after shooting",
-                        0.60, Math.toRadians(1.5), true,
-                        LONG_STRAFE_TIMEOUT_SECONDS)) return;
-
-                if (!driveForwardWithIntake(INTAKE_FORWARD_DISTANCE_INCHES)) return;
-                logSecondApproachPollen = true;
-                latestPollenColumnTx = Double.NaN;
-                latestPollenColumnNanos = 0;
-                limelightLogTimer.reset();
-                boolean reachedApproachCurve = driveToPose(FINAL_X_INCHES,
-                        FINAL_Y_INCHES,
-                        SECOND_SHOOTING_HEADING_DEGREES,
-                        "Turn early toward second shooting position",
-                        12.0, Math.toRadians(25.0), false);
-                if (!reachedApproachCurve) {
-                    logSecondApproachPollen = false;
-                    return;
-                }
-                boolean reachedPrewallAlignment = driveToPose(
-                        SECOND_FINAL_X_INCHES,
-                        SECOND_PREWALL_Y_INCHES,
-                        SECOND_SHOOTING_HEADING_DEGREES,
-                        "Align X before approaching flower wall",
-                        2.0, Math.toRadians(4.0), false);
-                if (!reachedPrewallAlignment) {
-                    logSecondApproachPollen = false;
-                    return;
-                }
-                // Vision is most repeatable as a separate low-speed lateral
-                // alignment after heading and coarse odometry have settled.
-                if (!alignToPollenColumn()) {
-                    logSecondApproachPollen = false;
-                    return;
-                }
-                double alignedFlowerX = x;
-                boolean reachedSecondPosition = driveToPose(alignedFlowerX,
-                        SECOND_FINAL_Y_INCHES,
-                        SECOND_SHOOTING_HEADING_DEGREES,
-                        "Drive and turn into new shooting position",
-                        2.25, Math.toRadians(1.5), true,
-                        SECOND_FINAL_APPROACH_TIMEOUT_SECONDS);
-                logSecondApproachPollen = false;
-                if (!reachedSecondPosition) return;
-
-                if (!waitForShooterSpinup()) return;
-                if (!runSecondShootingCycleWithIntake()) return;
-                runParkPath("Normal park after second shooting");
+                shooter.setVelocity(0);
+                startIntake();
+                RobotLog.ii(TAG, "INTAKE_START id=%s after_opening_shot=true", runId);
+                shootingState = "INTAKE RUNNING - FOLLOWING RECORDED PATH";
+                if (!driveToPose(RED_INTAKE_WAYPOINT_1_X_INCHES,
+                        RED_INTAKE_WAYPOINT_1_Y_INCHES,
+                        RED_INTAKE_HEADING_DEGREES,
+                        "Recorded intake path waypoint 1",
+                        3.0, Math.toRadians(8.0), false)) return;
+                if (!driveToPose(RED_INTAKE_WAYPOINT_2_X_INCHES,
+                        RED_INTAKE_WAYPOINT_2_Y_INCHES,
+                        RED_INTAKE_HEADING_DEGREES,
+                        "Recorded intake path waypoint 2",
+                        3.0, Math.toRadians(8.0), false)) return;
+                if (!driveToPose(RED_INTAKE_X_INCHES,
+                        RED_INTAKE_Y_INCHES,
+                        RED_INTAKE_HEADING_DEGREES,
+                        "Recorded red intake position")) return;
+                if (!driveForwardTimedWithIntake(
+                        RED_INTAKE_FINAL_FORWARD_SECONDS)) return;
+                shootingState = "RED INTAKE COLLECTION COMPLETE";
             }
         } catch (ParkNowException ignored) {
             runParkPath("Five-second emergency park");
@@ -389,18 +341,24 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     private void runShooterAndWindmill() {
         shootingState = "SHOOTER + WINDMILL RUNNING";
-        windmill.setPower(-1);
         ElapsedTime shootingTimer = new ElapsedTime();
-        RobotLog.ii(TAG, "Windmill running continuously with shooter");
+        RobotLog.ii(TAG, "Windmill feeds at full power only above %.0f ticks/s",
+                SHOOTER_READY_VELOCITY);
         while (opModeIsActive() && shootingTimer.seconds() < SHOOTING_SECONDS) {
             checkParkDeadline();
             // Hold one velocity for every ball; do not reduce the target late
             // in the cycle while the windmill is still feeding.
             shooterTargetVelocity = SHOOTER_VELOCITY;
             shooter.setVelocity(shooterTargetVelocity);
+            double actualVelocity = Math.abs(shooter.getVelocity());
+            boolean readyToFeed = actualVelocity >= SHOOTER_READY_VELOCITY;
+            // -1.0 is the CR servo's maximum available software speed.
+            windmill.setPower(readyToFeed ? -1.0 : 0.0);
             telemetry.addData("Step", "Continuous shooting");
             telemetry.addData("Shooting time", "%.1f / %.1f sec",
                     shootingTimer.seconds(), SHOOTING_SECONDS);
+            telemetry.addData("Windmill", readyToFeed
+                    ? "FULL SPEED" : "WAITING FOR SHOOTER SPEED");
             addShootingTelemetry();
             telemetry.update();
             idle();
@@ -522,49 +480,54 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     private void recordPostShootingPickupPose() {
         stopDrive();
-        shootingState = "READY TO COLLECT - INTAKE + SHOOTER RUNNING";
-        intakeMotor.setPower(1.0);
-        leftIntakeServo.setPower(-1.0);
-        rightIntakeServo.setPower(-1.0);
-
-        // The intake motor shares the left odometry encoder channel. Keep the
-        // intended collection mechanism running until the operator explicitly
-        // enters safe recording mode, then discard those intake encoder ticks.
-        while (opModeIsActive() && !gamepad1.a) {
-            telemetry.addData("Mode", "POST-SHOOTING COLLECTION TEST");
-            telemetry.addLine("Intake and shooter are running; parking is disabled");
-            telemetry.addLine("Press A to stop mechanisms and record a pushed pose");
-            addShootingTelemetry();
-            telemetry.update();
-            idle();
-        }
-        if (!opModeIsActive()) return;
-
         stopIntake();
         shooter.setVelocity(0);
-        shootingState = "SAFE PUSH-POSITION RECORDER";
+        windmill.setPower(0);
+        shootingState = "PUSH TO RED INTAKE POSITION";
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         syncPodBaselines();
-        while (opModeIsActive() && gamepad1.a) idle();
+
+        ElapsedTime pathTimer = new ElapsedTime();
+        ElapsedTime pathLogTimer = new ElapsedTime();
+        RobotLog.ii(TAG, "RED INTAKE PATH START id=%s pose=(%.2f,%.2f,%.1f)",
+                runId, x, y, Math.toDegrees(heading));
 
         while (opModeIsActive() && !gamepad1.b) {
             updatePose();
             stopDrive();
-            telemetry.addData("Mode", "PUSH ROBOT TO NEW PICKUP POSITION");
+            if (pathLogTimer.milliseconds() >= 100) {
+                RobotLog.ii(TAG,
+                        "RED INTAKE PATH id=%s time=%.2f x=%.2f y=%.2f heading=%.1f",
+                        runId, pathTimer.seconds(), x, y, Math.toDegrees(heading));
+                pathLogTimer.reset();
+            }
+            telemetry.addData("Mode", "PUSH ROBOT TO RED INTAKE POSITION");
             telemetry.addData("X forward", "%+.2f in", x);
             telemetry.addData("Y left", "%+.2f in", y);
             telemetry.addData("Heading CCW", "%+.1f deg", Math.toDegrees(heading));
             telemetry.addLine("Press B to capture this pose");
+            telemetry.addLine("No timeout - waits until B or Stop");
             telemetry.update();
             idle();
         }
         if (!opModeIsActive()) return;
 
         updatePose();
-        RobotLog.ii(TAG, "POST-SHOOTING PICKUP POSE x=%.2f y=%.2f heading=%.1f",
-                x, y, Math.toDegrees(heading));
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        stopDrive();
+        RobotLog.ii(TAG,
+                "RED INTAKE POSE id=%s time=%.2f x=%.2f y=%.2f heading=%.1f",
+                runId, pathTimer.seconds(), x, y, Math.toDegrees(heading));
         while (opModeIsActive()) {
             stopDrive();
-            telemetry.addData("Mode", "PICKUP POSE CAPTURED");
+            telemetry.addData("Mode", "RED INTAKE POSE CAPTURED");
             telemetry.addData("RECORDED X forward", "%+.2f in", x);
             telemetry.addData("RECORDED Y left", "%+.2f in", y);
             telemetry.addData("RECORDED heading CCW", "%+.1f deg",
@@ -743,6 +706,29 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         RobotLog.ii(TAG, "INTAKE_CONTINUOUS id=%s pose=(%.2f,%.2f,%.1f) "
                         + "using=left+right+center",
                 runId, x, y, Math.toDegrees(heading));
+        return opModeIsActive();
+    }
+
+    private boolean driveForwardTimedWithIntake(double seconds) {
+        ElapsedTime timer = new ElapsedTime();
+        RobotLog.ii(TAG, "TIMED_INTAKE_START id=%s seconds=%.1f pose=(%.2f,%.2f,%.1f)",
+                runId, seconds, x, y, Math.toDegrees(heading));
+        while (opModeIsActive() && timer.seconds() < seconds) {
+            checkParkDeadline();
+            startIntake();
+            updatePose();
+            setMecanum(INTAKE_FORWARD_POWER, 0, 0);
+            telemetry.addData("Step", "Forward with intake for %.1f seconds", seconds);
+            telemetry.addData("Time", "%.1f / %.1f sec", timer.seconds(), seconds);
+            telemetry.addData("Pose X / Y", "%+.1f / %+.1f in", x, y);
+            telemetry.addData("Heading", "%+.1f deg", Math.toDegrees(heading));
+            telemetry.update();
+            idle();
+        }
+        stopDrive();
+        updatePose();
+        RobotLog.ii(TAG, "TIMED_INTAKE_END id=%s elapsed=%.2f pose=(%.2f,%.2f,%.1f)",
+                runId, timer.seconds(), x, y, Math.toDegrees(heading));
         return opModeIsActive();
     }
 
@@ -1136,7 +1122,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         previousRight = currentRight;
         previousCenter = currentCenter;
 
-        double deltaHeading = (deltaRight - deltaLeft) / POD_SPACING_INCHES;
+        // With the installed pod directions, left-minus-right is positive for
+        // a counterclockwise turn.
+        double deltaHeading = (deltaLeft - deltaRight) / POD_SPACING_INCHES;
         double forward = (deltaLeft + deltaRight) / 2.0;
         double lateral = deltaCenter - CENTER_POD_X_INCHES * deltaHeading;
         double midpoint = heading + deltaHeading / 2.0;
