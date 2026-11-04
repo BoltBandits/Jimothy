@@ -63,6 +63,8 @@ public class RedAutoOpSide extends LinearOpMode {
 
     private static final double UPRIGHT_ROLL_TOLERANCE_DEGREES = 10.0;
     private static final int REQUIRED_STABLE_FRAMES = 3;
+    private static final double AUTO_PERIOD_SECONDS = 30.0;
+    private static final double FINAL_MOVE_REMAINING_SECONDS = 6.0;
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -75,6 +77,7 @@ public class RedAutoOpSide extends LinearOpMode {
     private CRServo windmill;
     private AprilTagProcessor aprilTags;
     private VisionPortal webcamPortal;
+    private final ElapsedTime autonomousTimer = new ElapsedTime();
 
     private int previousLeft;
     private int previousRight;
@@ -84,19 +87,24 @@ public class RedAutoOpSide extends LinearOpMode {
     private double heading;
     private double shooterVelocity;
     private double shooterReadyVelocity;
+    private double finalPathOriginX;
+    private double finalPathOriginY;
+    private double finalPathOriginHeading;
 
     @Override
     public void runOpMode() {
         initializeHardware();
 
-        telemetry.addLine("RED AUTO OP SIDE READY");
+        telemetry.addData("Auto", "%s AUTO OP SIDE READY", targetColorLabel());
         telemetry.addData("First position", "X %.2f, Y %.2f, H %.1f",
                 TARGET_X, TARGET_Y, TARGET_HEADING_DEGREES);
-        telemetry.addLine("At position: wait indefinitely for upright red AprilTag");
+        telemetry.addData("At position", "wait indefinitely for upright %s AprilTag",
+                targetColorLabel().toLowerCase());
         telemetry.update();
 
         waitForStart();
         if (isStopRequested()) return;
+        autonomousTimer.reset();
         resetPose();
 
         try {
@@ -113,10 +121,12 @@ public class RedAutoOpSide extends LinearOpMode {
 
             stopDrive();
             shooter.setVelocity(shooterVelocity);
-            if (!waitForUprightRedTag()) return;
+            if (!waitForUprightTargetTag()) return;
             if (!waitForShooterReady()) return;
             shootFourBalls();
             if (!followPostShotPath()) return;
+            if (!waitForFinalMoveTime()) return;
+            if (!followFinalPath()) return;
             holdAfterShooting();
         } finally {
             stopDrive();
@@ -182,9 +192,20 @@ public class RedAutoOpSide extends LinearOpMode {
                                 double positionTolerance,
                                 double headingTolerance,
                                 boolean stopAtTarget, String step) {
+        return driveToPose(targetX, targetY, targetHeadingDegrees,
+                positionTolerance, headingTolerance, stopAtTarget, step,
+                DRIVE_TIMEOUT_SECONDS);
+    }
+
+    private boolean driveToPose(double targetX, double targetY,
+                                double targetHeadingDegrees,
+                                double positionTolerance,
+                                double headingTolerance,
+                                boolean stopAtTarget, String step,
+                                double timeoutSeconds) {
         ElapsedTime timer = new ElapsedTime();
         double targetHeading = Math.toRadians(targetHeadingDegrees);
-        while (opModeIsActive() && timer.seconds() < DRIVE_TIMEOUT_SECONDS) {
+        while (opModeIsActive() && timer.seconds() < timeoutSeconds) {
             updatePose();
             double errorX = targetX - x;
             double errorY = targetY - y;
@@ -222,7 +243,7 @@ public class RedAutoOpSide extends LinearOpMode {
             telemetry.addData("Pose", "X %+.1f Y %+.1f H %+.1f",
                     x, y, Math.toDegrees(heading));
             telemetry.addData("Position error", "%.1f in", positionError);
-            telemetry.addData("Time", "%.1f / %.1f", timer.seconds(), DRIVE_TIMEOUT_SECONDS);
+            telemetry.addData("Time", "%.1f / %.1f", timer.seconds(), timeoutSeconds);
             telemetry.update();
             idle();
         }
@@ -233,40 +254,53 @@ public class RedAutoOpSide extends LinearOpMode {
         return true;
     }
 
-    private boolean waitForUprightRedTag() {
+    protected String targetColorLabel() {
+        return "RED";
+    }
+
+    protected boolean isTargetCluster(String name) {
+        return name.equalsIgnoreCase("RED SCORING")
+                || name.equalsIgnoreCase("RED AUDIENCE");
+    }
+
+    protected boolean isTargetSingleTag(int id) {
+        return id >= 30 && id <= 37;
+    }
+
+    private boolean waitForUprightTargetTag() {
         int stableFrames = 0;
         while (opModeIsActive()) {
             shooter.setVelocity(shooterVelocity);
-            boolean uprightRedVisible = false;
+            boolean uprightTargetVisible = false;
             String detected = "NONE";
             double roll = Double.NaN;
             List<AprilTagDetection> detections = aprilTags.getDetections();
             for (AprilTagDetection detection : detections) {
-                boolean red;
+                boolean target;
                 if (detection instanceof AprilTagClusterDetection) {
                     AprilTagClusterDetection cluster =
                             (AprilTagClusterDetection) detection;
                     String name = cluster.metadata == null ? "" : cluster.metadata.name;
-                    red = name.equalsIgnoreCase("RED SCORING")
-                            || name.equalsIgnoreCase("RED AUDIENCE");
+                    target = isTargetCluster(name);
                     detected = name;
                 } else if (detection instanceof AprilTagSingleDetection) {
                     int id = ((AprilTagSingleDetection) detection).id;
-                    red = id >= 30 && id <= 37;
+                    target = isTargetSingleTag(id);
                     detected = "tag " + id;
                 } else {
-                    red = false;
+                    target = false;
                 }
-                if (red && detection.ftcPose != null
+                if (target && detection.ftcPose != null
                         && Math.abs(detection.ftcPose.roll)
                         <= UPRIGHT_ROLL_TOLERANCE_DEGREES) {
-                    uprightRedVisible = true;
+                    uprightTargetVisible = true;
                     roll = detection.ftcPose.roll;
                     break;
                 }
             }
-            stableFrames = uprightRedVisible ? stableFrames + 1 : 0;
-            telemetry.addData("Step", "Waiting for upright red AprilTag");
+            stableFrames = uprightTargetVisible ? stableFrames + 1 : 0;
+            telemetry.addData("Step", "Waiting for upright %s AprilTag",
+                    targetColorLabel().toLowerCase());
             telemetry.addData("Webcam", webcamPortal.getCameraState());
             telemetry.addData("Detected", detected);
             telemetry.addData("Roll", Double.isNaN(roll) ? "--" : "%+.1f deg", roll);
@@ -275,7 +309,8 @@ public class RedAutoOpSide extends LinearOpMode {
                     Math.abs(shooter.getVelocity()), shooterVelocity);
             telemetry.update();
             if (stableFrames >= REQUIRED_STABLE_FRAMES) {
-                RobotLog.ii(TAG, "UPRIGHT_RED_TAG_CONFIRMED %s roll=%.1f", detected, roll);
+                RobotLog.ii(TAG, "UPRIGHT_%s_TAG_CONFIRMED %s roll=%.1f",
+                        targetColorLabel(), detected, roll);
                 return true;
             }
             idle();
@@ -289,7 +324,8 @@ public class RedAutoOpSide extends LinearOpMode {
             shooter.setVelocity(shooterVelocity);
             double actual = Math.abs(shooter.getVelocity());
             if (actual >= shooterReadyVelocity) return true;
-            telemetry.addData("Step", "Red tag found - shooter spin-up");
+            telemetry.addData("Step", "%s tag found - shooter spin-up",
+                    targetColorLabel());
             telemetry.addData("Shooter", "%.0f / %.0f ticks/s", actual, shooterVelocity);
             telemetry.update();
             idle();
@@ -318,13 +354,48 @@ public class RedAutoOpSide extends LinearOpMode {
         double originX = x;
         double originY = y;
         double originHeading = heading;
-        if (!driveToRelativePose(originX, originY, originHeading,
-                -10.46, 0.07, -1.3,
-                1.25, 3.0, true, "Post-shot path 1/2: back")) return false;
-        return driveToRelativePose(originX, originY, originHeading,
-                -9.95, -21.81, 0.5,
-                POSITION_TOLERANCE, 3.0, true,
-                "Post-shot path 2/2: robot-right");
+        double cos = Math.cos(originHeading);
+        double sin = Math.sin(originHeading);
+        finalPathOriginX = originX + (-9.95) * cos - (-21.81) * sin;
+        finalPathOriginY = originY + (-9.95) * sin + (-21.81) * cos;
+        finalPathOriginHeading = normalize(originHeading + Math.toRadians(0.5));
+
+        double departureTime = AUTO_PERIOD_SECONDS - FINAL_MOVE_REMAINING_SECONDS;
+        double availableSeconds = Math.max(0.10,
+                departureTime - autonomousTimer.seconds());
+        return driveToPose(finalPathOriginX, finalPathOriginY,
+                Math.toDegrees(finalPathOriginHeading),
+                POSITION_TOLERANCE, Math.toRadians(4.0), true,
+                "Fast direct path to second position", availableSeconds);
+    }
+
+    private boolean waitForFinalMoveTime() {
+        stopDrive();
+        double departureTime = AUTO_PERIOD_SECONDS - FINAL_MOVE_REMAINING_SECONDS;
+        while (opModeIsActive() && autonomousTimer.seconds() < departureTime) {
+            double remaining = Math.max(0.0,
+                    AUTO_PERIOD_SECONDS - autonomousTimer.seconds());
+            telemetry.addData("Step", "Holding second position");
+            telemetry.addData("Auto time", "%.1f / %.1f sec",
+                    autonomousTimer.seconds(), AUTO_PERIOD_SECONDS);
+            telemetry.addData("Final move begins", "at %.1f sec remaining",
+                    FINAL_MOVE_REMAINING_SECONDS);
+            telemetry.addData("Time remaining", "%.1f sec", remaining);
+            telemetry.update();
+            idle();
+        }
+        return opModeIsActive();
+    }
+
+    private boolean followFinalPath() {
+        if (!driveToRelativePose(finalPathOriginX, finalPathOriginY,
+                finalPathOriginHeading,
+                -6.09, 35.69, -2.4,
+                5.0, 8.0, false, "Final path look-ahead")) return false;
+        return driveToRelativePose(finalPathOriginX, finalPathOriginY,
+                finalPathOriginHeading,
+                -5.67, 71.88, 1.8,
+                POSITION_TOLERANCE, 3.0, true, "Final position");
     }
 
     private boolean driveToRelativePose(double originX, double originY,
