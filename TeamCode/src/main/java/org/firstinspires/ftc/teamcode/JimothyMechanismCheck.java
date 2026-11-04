@@ -55,7 +55,9 @@ public class JimothyMechanismCheck extends OpMode {
                 * shooter.getMotorType().getTicksPerRev() / 60.0;
 
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        // Match the reversed intake-servo directions used by TeleOp and autonomous.
+        leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
         stopMechanisms();
 
         limelight.pipelineSwitch(0);

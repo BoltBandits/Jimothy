@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.RobotLog;
 
 /** Push-only test for checking three-wheel odometry signs and calibration. */
-@Autonomous(name = "Jimothy Odometry Test", group = "Jimothy Tests")
+@TeleOp(name = "Jimothy Odometry Test", group = "Jimothy Tests")
 public class JimothyOdometryTest extends LinearOpMode {
     private static final String TAG = "JimothyOdoTest";
     private static final double LEFT_TICKS_PER_INCH = 509.66;
@@ -33,6 +33,10 @@ public class JimothyOdometryTest extends LinearOpMode {
     private double x;
     private double y;
     private double heading;
+    private final com.qualcomm.robotcore.util.ElapsedTime pathTimer =
+            new com.qualcomm.robotcore.util.ElapsedTime();
+    private final com.qualcomm.robotcore.util.ElapsedTime pathLogTimer =
+            new com.qualcomm.robotcore.util.ElapsedTime();
 
     @Override
     public void runOpMode() {
@@ -56,33 +60,48 @@ public class JimothyOdometryTest extends LinearOpMode {
         preparePod(centerPod);
         resetPose();
 
-        telemetry.addLine("PUSH-ONLY TEST: drivetrain power stays zero");
+        telemetry.addLine("INTAKE PATH TEST: drivetrain power stays zero");
+        telemetry.addLine("Place robot at shooting position before Play");
         telemetry.addLine("A = reset origin, B = log checkpoint");
         telemetry.addLine("Expected: forward +X, left +Y, CCW +heading");
         telemetry.update();
         waitForStart();
         if (isStopRequested()) return;
         resetPose();
+        pathTimer.reset();
+        pathLogTimer.reset();
+        RobotLog.ii(TAG, "INTAKE_PATH_START pose=(0.00,0.00,0.0)");
 
         boolean previousA = false;
         boolean previousB = false;
+        boolean recordingComplete = false;
         while (opModeIsActive()) {
             if (gamepad1.a && !previousA) {
                 resetPose();
+                pathTimer.reset();
+                recordingComplete = false;
                 RobotLog.ii(TAG, "ORIGIN_RESET");
             }
             updatePose();
+            if (!recordingComplete && pathLogTimer.milliseconds() >= 100) {
+                RobotLog.ii(TAG,
+                        "INTAKE_PATH time=%.2f x=%.2f y=%.2f heading=%.1f",
+                        pathTimer.seconds(), x, y, Math.toDegrees(heading));
+                pathLogTimer.reset();
+            }
             if (gamepad1.b && !previousB) {
                 RobotLog.ii(TAG,
-                        "CHECKPOINT raw=(%d,%d,%d) delta=(%d,%d,%d) pose=(%.2f,%.2f,%.1f)",
+                        "INTAKE_POSE time=%.2f raw=(%d,%d,%d) delta=(%d,%d,%d) pose=(%.2f,%.2f,%.1f)",
+                        pathTimer.seconds(),
                         readLeft(), readRight(), readCenter(),
                         readLeft() - originLeft, readRight() - originRight,
                         readCenter() - originCenter, x, y, Math.toDegrees(heading));
+                recordingComplete = true;
             }
             previousA = gamepad1.a;
             previousB = gamepad1.b;
 
-            telemetry.addLine("Expected: forward +X | left +Y | CCW +heading");
+            telemetry.addLine("Push along desired route; keep final heading near 0");
             telemetry.addData("Pose X forward", "%+.2f in", x);
             telemetry.addData("Pose Y left", "%+.2f in", y);
             telemetry.addData("Heading CCW", "%+.1f deg", Math.toDegrees(heading));
@@ -92,7 +111,9 @@ public class JimothyOdometryTest extends LinearOpMode {
                     readRight() - originRight);
             telemetry.addData("Center raw / delta", "%d / %d", readCenter(),
                     readCenter() - originCenter);
-            telemetry.addLine("A reset | B save checkpoint | STOP when done");
+            telemetry.addData("Recorder", recordingComplete
+                    ? "CAPTURED - logging frozen" : "RECORDING PATH");
+            telemetry.addLine("A reset/new recording | B capture and freeze | STOP when done");
             telemetry.update();
             idle();
         }

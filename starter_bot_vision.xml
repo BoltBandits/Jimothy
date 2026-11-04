@@ -12,8 +12,8 @@
             <goBILDA5202SeriesMotor name="right_front_drive" port="1" />
             <goBILDA5202SeriesMotor name="left_back_drive" port="2" />
             <goBILDA5202SeriesMotor name="right_back_drive" port="3" />
-            <ContinuousRotationServo name="left_intake_servo" port="0" />
-            <ContinuousRotationServo name="right_intake_servo" port="1" />
+            <ContinuousRotationServo name="right_intake_servo" port="0" />
+            <ContinuousRotationServo name="left_intake_servo" port="3" />
             <ContinuousRotationServo name="windmill_servo" port="2" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
