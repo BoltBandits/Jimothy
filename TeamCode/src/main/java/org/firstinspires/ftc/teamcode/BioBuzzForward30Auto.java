@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Size;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -13,6 +15,14 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagClusterDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.apriltag.AprilTagSingleDetection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +88,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SHOOTER_READY_FRACTION_OF_TARGET = 0.97;
     private static final double SHOOTER_SPINUP_TIMEOUT_SECONDS = 3.0;
     private static final double SHOOTING_SECONDS = 5.5;
+    private static final double SECOND_SHOT_TAG_TIMEOUT_SECONDS = 2.0;
     // Measured from the audience-side shooting origin during the pushed
     // calibration run. Keep the robot in its starting orientation.
     private static final double RED_INTAKE_WAYPOINT_1_X_INCHES = -6.44;
@@ -162,6 +173,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private CRServo leftIntakeServo;
     private CRServo rightIntakeServo;
     private Limelight3A limelight;
+    private AprilTagProcessor aprilTags;
+    private VisionPortal webcamPortal;
     private final ElapsedTime limelightLogTimer = new ElapsedTime();
     private final ElapsedTime pressLogTimer = new ElapsedTime();
     private final ElapsedTime autonomousTimer = new ElapsedTime();
@@ -233,6 +246,15 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         rightIntakeServo.setPower(0);
         limelight.pipelineSwitch(LIMELIGHT_PIPELINE);
         limelight.start();
+        aprilTags = new AprilTagProcessor.Builder()
+                .setTagLibrary(AprilTagGameDatabase.getBioBuzzTagLibrary())
+                .build();
+        aprilTags.setDecimation(1.0f);
+        webcamPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(1280, 720))
+                .addProcessor(aprilTags)
+                .build();
         stopDrive();
         resetPose();
 
@@ -297,6 +319,16 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 // recorded route to the second shooting position.
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
+                if (!waitForSecondShotTarget()) {
+                    if (!opModeIsActive()) return;
+                    shooter.setVelocity(0);
+                    shootingState = "TAG TIMEOUT - DRIVING TO PARK";
+                    RobotLog.ww(TAG, "SECOND_SHOT_TAG_TIMEOUT id=%s target=%s; skipping shot",
+                            runId, secondShotTargetName());
+                    if (!parkTwoFeetRobotLeft()) return;
+                    shootingState = "PARKED AFTER TAG TIMEOUT";
+                    return;
+                }
                 if (!waitForShooterSpinup()) return;
                 // Same four-ball timed feed routine used at the starting pose.
                 runShooterAndWindmill(true);
@@ -313,6 +345,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             shooter.setVelocity(0);
             windmill.setPower(0);
             if (limelight != null) limelight.stop();
+            if (webcamPortal != null) webcamPortal.close();
             shootingState = "STOPPED";
         }
 
@@ -341,6 +374,52 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 POSITION_TOLERANCE_INCHES, Math.toRadians(3.0), true,
                 SECOND_SHOOTING_POSE_TIMEOUT_SECONDS,
                 SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS);
+    }
+
+    protected String secondShotTargetName() {
+        return "RED SCORING";
+    }
+
+    protected boolean isSecondShotTargetSingleTag(int id) {
+        return id >= 30 && id <= 33;
+    }
+
+    private boolean waitForSecondShotTarget() {
+        stopDrive();
+        shootingState = "WAITING FOR " + secondShotTargetName() + " APRILTAG";
+        ElapsedTime timer = new ElapsedTime();
+        while (opModeIsActive() && timer.seconds() < SECOND_SHOT_TAG_TIMEOUT_SECONDS) {
+            shooter.setVelocity(shooterTargetVelocity);
+            String detected = "NONE";
+            for (AprilTagDetection detection : aprilTags.getDetections()) {
+                boolean target = false;
+                if (detection instanceof AprilTagClusterDetection) {
+                    AprilTagClusterDetection cluster = (AprilTagClusterDetection) detection;
+                    detected = cluster.metadata == null ? "unknown cluster"
+                            : cluster.metadata.name;
+                    target = detected.equalsIgnoreCase(secondShotTargetName());
+                } else if (detection instanceof AprilTagSingleDetection) {
+                    int id = ((AprilTagSingleDetection) detection).id;
+                    detected = "tag " + id;
+                    target = isSecondShotTargetSingleTag(id);
+                }
+                if (target) {
+                    RobotLog.ii(TAG, "SECOND_SHOT_TAG_FOUND id=%s target=%s detected=%s elapsed=%.2f",
+                            runId, secondShotTargetName(), detected, timer.seconds());
+                    shootingState = secondShotTargetName() + " APRILTAG FOUND";
+                    return true;
+                }
+            }
+            telemetry.addData("Step", "Recognizing %s AprilTag", secondShotTargetName());
+            telemetry.addData("Detected", detected);
+            telemetry.addData("Tag timeout", "%.1f / %.1f sec",
+                    timer.seconds(), SECOND_SHOT_TAG_TIMEOUT_SECONDS);
+            telemetry.addData("Webcam", webcamPortal.getCameraState());
+            addShootingTelemetry();
+            telemetry.update();
+            idle();
+        }
+        return false;
     }
 
     private boolean parkTwoFeetRobotLeft() {

@@ -124,7 +124,7 @@ public class RedAutoOpSide extends LinearOpMode {
             if (!waitForUprightTargetTag()) return;
             if (!waitForShooterReady()) return;
             shootFourBalls();
-            if (!followPostShotPath()) return;
+            recordFinalPathReference();
             if (!waitForFinalMoveTime()) return;
             if (!followFinalPath()) return;
             holdAfterShooting();
@@ -350,23 +350,17 @@ public class RedAutoOpSide extends LinearOpMode {
         shooter.setVelocity(0);
     }
 
-    private boolean followPostShotPath() {
+    private void recordFinalPathReference() {
         double originX = x;
         double originY = y;
         double originHeading = heading;
         double cos = Math.cos(originHeading);
         double sin = Math.sin(originHeading);
+        // Preserve the calibrated final field destination, but do not drive to
+        // the old post-shot holding point. The robot now waits where it shot.
         finalPathOriginX = originX + (-9.95) * cos - (-21.81) * sin;
         finalPathOriginY = originY + (-9.95) * sin + (-21.81) * cos;
         finalPathOriginHeading = normalize(originHeading + Math.toRadians(0.5));
-
-        double departureTime = AUTO_PERIOD_SECONDS - FINAL_MOVE_REMAINING_SECONDS;
-        double availableSeconds = Math.max(0.10,
-                departureTime - autonomousTimer.seconds());
-        return driveToPose(finalPathOriginX, finalPathOriginY,
-                Math.toDegrees(finalPathOriginHeading),
-                POSITION_TOLERANCE, Math.toRadians(4.0), true,
-                "Fast direct path to second position", availableSeconds);
     }
 
     private boolean waitForFinalMoveTime() {
@@ -375,7 +369,7 @@ public class RedAutoOpSide extends LinearOpMode {
         while (opModeIsActive() && autonomousTimer.seconds() < departureTime) {
             double remaining = Math.max(0.0,
                     AUTO_PERIOD_SECONDS - autonomousTimer.seconds());
-            telemetry.addData("Step", "Holding second position");
+            telemetry.addData("Step", "Holding shooting position");
             telemetry.addData("Auto time", "%.1f / %.1f sec",
                     autonomousTimer.seconds(), AUTO_PERIOD_SECONDS);
             telemetry.addData("Final move begins", "at %.1f sec remaining",
@@ -388,14 +382,10 @@ public class RedAutoOpSide extends LinearOpMode {
     }
 
     private boolean followFinalPath() {
-        if (!driveToRelativePose(finalPathOriginX, finalPathOriginY,
-                finalPathOriginHeading,
-                -6.09, 35.69, -2.4,
-                5.0, 8.0, false, "Final path look-ahead")) return false;
         return driveToRelativePose(finalPathOriginX, finalPathOriginY,
                 finalPathOriginHeading,
                 -5.67, 71.88, 1.8,
-                POSITION_TOLERANCE, 3.0, true, "Final position");
+                POSITION_TOLERANCE, 3.0, true, "Direct path to final position");
     }
 
     private boolean driveToRelativePose(double originX, double originY,

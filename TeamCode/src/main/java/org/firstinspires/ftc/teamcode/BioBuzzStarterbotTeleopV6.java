@@ -93,13 +93,13 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private VisionPortal webcamPortal;
     private List<LynxModule> hubs;
     private ServoController gobildaLightServos;
-    private double launcherMaxVelocity;
-    private double launcherNormalVelocity;
-    private double launcherTurboVelocity;
-    private double launcherTargetVelocity;
+    protected double launcherMaxVelocity;
+    protected double launcherNormalVelocity;
+    protected double launcherTurboVelocity;
+    protected double launcherTargetVelocity;
     private double feedMinVelocity;
-    private boolean turbo;
-    private boolean lastTurbo;
+    protected boolean turbo;
+    protected boolean lastTurbo;
     private final ElapsedTime logTimer = new ElapsedTime();
 
     private double leftFrontPower;
@@ -155,8 +155,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40.0, 0.0, 0.0, 12.5));
         // Full free speed from the motor type in the robot config (goBILDA 5202: ~2800 ticks/s).
         launcherMaxVelocity = launcher.getMotorType().getMaxRPM() * launcher.getMotorType().getTicksPerRev() / 60.0;
-        launcherNormalVelocity = LAUNCHER_SPEED_FRACTION * launcherMaxVelocity;
-        launcherTurboVelocity = LAUNCHER_TURBO_SPEED_FRACTION * launcherMaxVelocity;
+        launcherNormalVelocity = normalShooterFraction() * launcherMaxVelocity;
+        launcherTurboVelocity = turboShooterFraction() * launcherMaxVelocity;
         launcherTargetVelocity = launcherNormalVelocity;
         RobotLog.ii(TAG, "init max=%.0f normal=%.0f turbo=%.0f ticks/s", launcherMaxVelocity,
                 launcherNormalVelocity, launcherTurboVelocity);
@@ -222,15 +222,15 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         telemetry.addData("Triggers", "left (%.2f), right (%.2f)", gamepad2.left_trigger, gamepad2.right_trigger);
         telemetry.addData("Launcher", "%.0f / %.0f ticks/s (%.0f%% of max)", launcherVelocity, launcherTargetVelocity,
                 100.0 * launcherVelocity / launcherMaxVelocity);
-        telemetry.addData("Launcher setting", "%s: %.0f%% of %.0f ticks/s max (normal %.0f%%, turbo %.0f%% on gp2 A)",
-                turbo ? "TURBO" : "normal", 100.0 * launcherTargetVelocity / launcherMaxVelocity, launcherMaxVelocity,
-                LAUNCHER_SPEED_FRACTION * 100, LAUNCHER_TURBO_SPEED_FRACTION * 100);
+        telemetry.addData("Launcher setting", "%s: %.0f%% of %.0f ticks/s max (%s)",
+                shooterSettingLabel(), 100.0 * launcherTargetVelocity / launcherMaxVelocity,
+                launcherMaxVelocity, shooterSettingsDescription());
         telemetry.addData("Windmill feed", !shooting ? "-" : launcherFastEnough ? "FEEDING" : "WAITING FOR SPEED");
         telemetry.addData("Intake motor / servos / windmill", "%.2f / %.2f / %.2f", intakePower, intakeServoPower, windmillPower);
         boolean redTargetAligned = showAprilTags();
         showLight(redTargetAligned ? Light.GREEN : Light.OFF);
         telemetry.addData("Lights", "%s (requires visible upright red AprilTag)", currentLight);
-        telemetry.addData("Controls", "BIOBUZZ v6 - AprilTag alignment lights");
+        telemetry.addData("Controls", controlsDescription());
     }
 
     @Override
@@ -394,7 +394,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
     // Turbo while A is held. The sound and rumble fire once per press (rising
     // edge), not every loop, so holding A doesn't repeat them.
-    private void updateTurbo() {
+    protected void updateTurbo() {
         turbo = gamepad2.a;
         if (turbo && !lastTurbo) {
             telemetry.speak("Turbo");
@@ -406,6 +406,27 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         }
         lastTurbo = turbo;
         launcherTargetVelocity = turbo ? launcherTurboVelocity : launcherNormalVelocity;
+    }
+
+    protected double normalShooterFraction() {
+        return LAUNCHER_SPEED_FRACTION;
+    }
+
+    protected double turboShooterFraction() {
+        return LAUNCHER_TURBO_SPEED_FRACTION;
+    }
+
+    protected String shooterSettingLabel() {
+        return turbo ? "TURBO" : "normal";
+    }
+
+    protected String shooterSettingsDescription() {
+        return String.format("normal %.0f%%, turbo %.0f%% on gp2 A",
+                LAUNCHER_SPEED_FRACTION * 100, LAUNCHER_TURBO_SPEED_FRACTION * 100);
+    }
+
+    protected String controlsDescription() {
+        return "BIOBUZZ v6 - AprilTag alignment lights";
     }
 
     private void launch() {
