@@ -120,22 +120,27 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
-        intake = hardwareMap.get(DcMotor.class, "intake_motor");
-        launcher = hardwareMap.get(DcMotorEx.class, "shooter_motor");
-        windmillServo = hardwareMap.get(CRServo.class, "windmill_servo");
-        leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
-        rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
-        WebcamName webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        aprilTags = new AprilTagProcessor.Builder()
-                .setTagLibrary(AprilTagGameDatabase.getBioBuzzTagLibrary())
-                .build();
-        // Maximum image detail for better detection of smaller or farther tags.
-        aprilTags.setDecimation(1.0f);
-        webcamPortal = new VisionPortal.Builder()
-                .setCamera(webcam)
-                .setCameraResolution(new Size(1280, 720))
-                .addProcessor(aprilTags)
-                .build();
+        // Mechanisms are optional so a drivetrain-only robot can still use TeleOp.
+        intake = hardwareMap.tryGet(DcMotor.class, "intake_motor");
+        launcher = hardwareMap.tryGet(DcMotorEx.class, "shooter_motor");
+        windmillServo = hardwareMap.tryGet(CRServo.class, "windmill_servo");
+        leftIntakeServo = hardwareMap.tryGet(CRServo.class, "left_intake_servo");
+        rightIntakeServo = hardwareMap.tryGet(CRServo.class, "right_intake_servo");
+        WebcamName webcam = hardwareMap.tryGet(WebcamName.class, "Webcam 1");
+        if (webcam != null) {
+            aprilTags = new AprilTagProcessor.Builder()
+                    .setTagLibrary(AprilTagGameDatabase.getBioBuzzTagLibrary())
+                    .build();
+            // Maximum image detail for better detection of smaller or farther tags.
+            aprilTags.setDecimation(1.0f);
+            webcamPortal = new VisionPortal.Builder()
+                    .setCamera(webcam)
+                    .setCameraResolution(new Size(1280, 720))
+                    .addProcessor(aprilTags)
+                    .build();
+        } else {
+            telemetry.addLine("Note: no 'Webcam 1'; AprilTag alignment disabled.");
+        }
         hubs = hardwareMap.getAll(LynxModule.class);
         gobildaLightServos = hardwareMap.tryGet(ServoController.class, GOBILDA_LIGHT_HUB);
         if (gobildaLightServos == null) {
@@ -150,11 +155,22 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40.0, 0.0, 0.0, 12.5));
-        // Full free speed from the motor type in the robot config (goBILDA 5202: ~2800 ticks/s).
-        launcherMaxVelocity = launcher.getMotorType().getMaxRPM() * launcher.getMotorType().getTicksPerRev() / 60.0;
+        if (intake != null) {
+            intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        } else {
+            telemetry.addLine("Note: no 'intake_motor'; intake motor disabled.");
+        }
+        if (launcher != null) {
+            launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+                    new PIDFCoefficients(40.0, 0.0, 0.0, 12.5));
+            // Full free speed from the motor type in the robot config.
+            launcherMaxVelocity = launcher.getMotorType().getMaxRPM()
+                    * launcher.getMotorType().getTicksPerRev() / 60.0;
+        } else {
+            launcherMaxVelocity = 1.0;
+            telemetry.addLine("Note: no 'shooter_motor'; shooter disabled.");
+        }
         launcherNormalVelocity = normalShooterFraction() * launcherMaxVelocity;
         launcherTurboVelocity = turboShooterFraction() * launcherMaxVelocity;
         launcherTargetVelocity = launcherNormalVelocity;
@@ -162,13 +178,18 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                 launcherNormalVelocity, launcherTurboVelocity);
         feedMinVelocity = WINDMILL_FEED_MIN_SPEED_FRACTION * launcherMaxVelocity;
 
-        leftIntakeServo.setPower(0.0);
-        rightIntakeServo.setPower(0.0);
-        windmillServo.setPower(0.0);
-        // Both intake servos intentionally run opposite their previous directions.
-        leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
-        windmillServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (leftIntakeServo != null) {
+            leftIntakeServo.setPower(0.0);
+            leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
+        if (rightIntakeServo != null) {
+            rightIntakeServo.setPower(0.0);
+            rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+        if (windmillServo != null) {
+            windmillServo.setPower(0.0);
+            windmillServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
 
         telemetry.addData("Status", "Initialized");
     }
@@ -192,13 +213,14 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
         updateTurbo();
         launch();
-        double launcherVelocity = launcher.getVelocity();
+        double launcherVelocity = launcher == null ? 0.0 : launcher.getVelocity();
         boolean launcherFastEnough = launcherVelocity > feedMinVelocity;
         boolean shooting = gamepad2.right_bumper || turbo;
         if (shooting && logTimer.seconds() >= LOG_PERIOD_S) {
             logTimer.reset();
             RobotLog.ii(TAG, "turbo=%d rb=%d target=%.0f actual=%.0f power=%.2f", turbo ? 1 : 0,
-                    gamepad2.right_bumper ? 1 : 0, launcherTargetVelocity, launcherVelocity, launcher.getPower());
+                    gamepad2.right_bumper ? 1 : 0, launcherTargetVelocity, launcherVelocity,
+                    launcher == null ? 0.0 : launcher.getPower());
         }
 
         setIntakePower(intakePower, intakeServoPower);
@@ -213,7 +235,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         } else {
             windmillPower = 0.0;
         }
-        windmillServo.setPower(windmillPower);
+        if (windmillServo != null) windmillServo.setPower(windmillPower);
 
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftFrontPower, rightFrontPower);
         telemetry.addData("Raw drive sticks F / S / R", "%.3f / %.3f / %.3f",
@@ -242,6 +264,10 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     }
 
     private boolean showAprilTags() {
+        if (webcamPortal == null || aprilTags == null) {
+            telemetry.addData("Webcam", "NOT CONFIGURED");
+            return false;
+        }
         telemetry.addData("Webcam", webcamPortal.getCameraState());
         List<AprilTagDetection> detections = aprilTags.getDetections();
         telemetry.addData("AprilTags detected", detections.size());
@@ -387,9 +413,9 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     }
 
     private void setIntakePower(double motorPower, double servoPower) {
-        intake.setPower(motorPower);
-        leftIntakeServo.setPower(servoPower);
-        rightIntakeServo.setPower(servoPower);
+        if (intake != null) intake.setPower(motorPower);
+        if (leftIntakeServo != null) leftIntakeServo.setPower(servoPower);
+        if (rightIntakeServo != null) rightIntakeServo.setPower(servoPower);
     }
 
     // Turbo while A is held. The sound and rumble fire once per press (rising
@@ -430,6 +456,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     }
 
     private void launch() {
+        if (launcher == null) return;
         if (gamepad2.right_bumper || turbo) {
             launcher.setVelocity(launcherTargetVelocity);
         } else if (gamepad2.left_bumper) {
