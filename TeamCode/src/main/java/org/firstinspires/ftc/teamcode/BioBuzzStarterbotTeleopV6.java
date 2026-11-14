@@ -35,11 +35,11 @@ import java.util.concurrent.TimeUnit;
  * Hub has no speaker of its own).
  *
  * The indicator lights are GREEN only while a RED SCORING or RED AUDIENCE
- * AprilTag is visible and upright within 10 degrees of roll. Otherwise every
+ * AprilTag is visible and upright within 8 degrees of roll. Otherwise every
  * indicator light remains off. Shooter speed still controls the windmill feed
  * independently of the AprilTag light.
  *
- * "Lights" are the goBILDA RGB light on Expansion Hub 2 servo port 3 (not in
+ * "Lights" are the goBILDA RGB light on Expansion Hub 2 servo port 0 (not in
  * the robot config; driven directly), the Control Hub and Expansion Hub LEDs,
  * and gamepad 2's light bar (PS4/PS5-style pads only). When off, the hubs
  * show their normal status pattern.
@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * Gamepad 1: left stick drive/strafe, right stick turn.
  * Gamepad 2: right trigger intake, left trigger reverse,
  *            right bumper shoot (launcher, then windmill above 35%), left bumper eject,
- *            A (hold) turbo shoot at 61.79976%.
+ *            A (hold) turbo shoot at 61.79976%, X lower arm, Y raise arm.
  */
 @TeleOp(name = "Jimothy TeleOp", group = "Jimothy")
 public class BioBuzzStarterbotTeleopV6 extends OpMode {
@@ -62,17 +62,27 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private static final String TAG = "TeleopV6";
     private static final double LOG_PERIOD_S = 0.25;
     private static final double DRIVE_DEADZONE = 0.15;
-    private static final double RED_TARGET_UPRIGHT_ROLL_TOLERANCE_DEGREES = 10.0;
+    // Disabled until the unstable USB webcam connection is repaired. Keeping
+    // VisionPortal closed prevents FTC's camera-reopen crash from killing the RC app.
+    private static final boolean USB_WEBCAM_ENABLED = false;
+    private static final double RED_TARGET_UPRIGHT_ROLL_TOLERANCE_DEGREES = 8.0;
+    private static final int TARGET_MIN_CLUSTER_VISIBILITY_PERCENT = 50;
     public static final double LAUNCHER_EJECT_VELOCITY = 35;
     // The windmill feeds, and the lights turn green, above this fraction of full speed.
     public static final double WINDMILL_FEED_MIN_SPEED_FRACTION = 0.35;
+    private static final double WINDMILL_CONTINUOUS_POWER = -1.0;
     // goBILDA RGB Indicator Light (same positions as Light Test / Shooter Test).
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
-    private static final int GOBILDA_LIGHT_PORT = 3;
+    private static final int GOBILDA_LIGHT_PORT = 0;
+    private static final int ARM_SERVO_PORT = 1;
+    private static final double ARM_LOWER_POSITION = 0.0;
+    private static final double ARM_RAISE_POSITION = 1.0;
     private static final double GOBILDA_OFF = 0.0;
     private static final double GOBILDA_RED = 0.279;
     private static final double GOBILDA_GREEN = 0.500;
     private static final double GOBILDA_BLUE = 0.611;
+    private static final List<Blinker.Step> SOLID_OFF =
+            Collections.singletonList(new Blinker.Step(Color.BLACK, 1, TimeUnit.SECONDS));
     private static final List<Blinker.Step> SOLID_GREEN =
             Collections.singletonList(new Blinker.Step(Color.GREEN, 1, TimeUnit.SECONDS));
     private static final List<Blinker.Step> SOLID_RED =
@@ -109,6 +119,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private double intakePower;
     private double intakeServoPower;
     private double windmillPower;
+    private boolean windmillFeedArmed;
+    private double armPosition = Double.NaN;
 
     private enum Light { OFF, RED, GREEN, BLUE }
     // null until the first loop so the lights are always set once.
@@ -126,8 +138,9 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         windmillServo = hardwareMap.tryGet(CRServo.class, "windmill_servo");
         leftIntakeServo = hardwareMap.tryGet(CRServo.class, "left_intake_servo");
         rightIntakeServo = hardwareMap.tryGet(CRServo.class, "right_intake_servo");
-        WebcamName webcam = hardwareMap.tryGet(WebcamName.class, "Webcam 1");
-        if (webcam != null) {
+        WebcamName webcam = USB_WEBCAM_ENABLED
+                ? hardwareMap.tryGet(WebcamName.class, "Webcam 1") : null;
+        if (USB_WEBCAM_ENABLED && webcam != null) {
             aprilTags = new AprilTagProcessor.Builder()
                     .setTagLibrary(AprilTagGameDatabase.getBioBuzzTagLibrary())
                     .build();
@@ -138,8 +151,10 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                     .setCameraResolution(new Size(1280, 720))
                     .addProcessor(aprilTags)
                     .build();
-        } else {
+        } else if (USB_WEBCAM_ENABLED) {
             telemetry.addLine("Note: no 'Webcam 1'; AprilTag alignment disabled.");
+        } else {
+            telemetry.addLine("USB webcam disabled for Robot Controller stability.");
         }
         hubs = hardwareMap.getAll(LynxModule.class);
         gobildaLightServos = hardwareMap.tryGet(ServoController.class, GOBILDA_LIGHT_HUB);
@@ -199,6 +214,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         mecanumDrive(applyDriveDeadzone(-gamepad1.left_stick_y),
                 applyDriveDeadzone(gamepad1.left_stick_x),
                 applyDriveDeadzone(gamepad1.right_stick_x));
+        updateArm();
 
         if (gamepad2.right_trigger > 0) {
             intakePower = gamepad2.right_trigger;
@@ -216,6 +232,13 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         double launcherVelocity = launcher == null ? 0.0 : launcher.getVelocity();
         boolean launcherFastEnough = launcherVelocity > feedMinVelocity;
         boolean shooting = gamepad2.right_bumper || turbo;
+        if (!shooting) {
+            windmillFeedArmed = false;
+        } else if (launcherFastEnough) {
+            // Once the shooter reaches speed, keep feeding until the driver
+            // releases the shoot command even if velocity dips after a ball.
+            windmillFeedArmed = true;
+        }
         if (shooting && logTimer.seconds() >= LOG_PERIOD_S) {
             logTimer.reset();
             RobotLog.ii(TAG, "turbo=%d rb=%d target=%.0f actual=%.0f power=%.2f", turbo ? 1 : 0,
@@ -226,12 +249,11 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         setIntakePower(intakePower, intakeServoPower);
 
         if (shooting) {
-            // Feed only above 35%; stops again whenever the launcher drops to 35% or below.
-            windmillPower = launcherFastEnough ? -1.0 : 0.0;
+            windmillPower = windmillFeedArmed ? WINDMILL_CONTINUOUS_POWER : 0.0;
         } else if (gamepad2.left_bumper) {
-            windmillPower = 1.0;
+            windmillPower = WINDMILL_CONTINUOUS_POWER;
         } else if (gamepad2.left_trigger > 0) {
-            windmillPower = gamepad2.left_trigger;
+            windmillPower = WINDMILL_CONTINUOUS_POWER * gamepad2.left_trigger;
         } else {
             windmillPower = 0.0;
         }
@@ -247,11 +269,15 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         telemetry.addData("Launcher setting", "%s: %.0f%% of %.0f ticks/s max (%s)",
                 shooterSettingLabel(), 100.0 * launcherTargetVelocity / launcherMaxVelocity,
                 launcherMaxVelocity, shooterSettingsDescription());
-        telemetry.addData("Windmill feed", !shooting ? "-" : launcherFastEnough ? "FEEDING" : "WAITING FOR SPEED");
+        telemetry.addData("Windmill feed", !shooting ? "-"
+                : windmillFeedArmed ? "FEEDING CONTINUOUSLY" : "WAITING FOR SPEED");
         telemetry.addData("Intake motor / servos / windmill", "%.2f / %.2f / %.2f", intakePower, intakeServoPower, windmillPower);
-        boolean redTargetAligned = showAprilTags();
-        showLight(redTargetAligned ? Light.GREEN : Light.OFF);
-        telemetry.addData("Lights", "%s (requires visible upright red AprilTag)", currentLight);
+        telemetry.addData("Arm", Double.isNaN(armPosition) ? "not commanded (gp2 X=lower, Y=raise)"
+                : String.format("%.2f (gp2 X=lower, Y=raise)", armPosition));
+        boolean targetAligned = showAprilTags();
+        showLight(targetAligned ? Light.GREEN : Light.OFF);
+        telemetry.addData("Lights", "%s (requires visible upright %s AprilTag)",
+                currentLight, targetAllianceName());
         telemetry.addData("Controls", controlsDescription());
     }
 
@@ -280,8 +306,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
             if (detection instanceof AprilTagClusterDetection) {
                 AprilTagClusterDetection cluster = (AprilTagClusterDetection) detection;
                 String name = cluster.metadata == null ? "unknown cluster" : cluster.metadata.name;
-                boolean redTarget = name.equalsIgnoreCase("RED SCORING")
-                        || name.equalsIgnoreCase("RED AUDIENCE");
+                boolean redTarget = isTargetCluster(name);
                 if (detection.ftcPose == null) {
                     telemetry.addData("Tag cluster", "%s, %d%% visible",
                             name, cluster.percentClusterFound);
@@ -291,7 +316,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                             name, cluster.percentClusterFound, detection.ftcPose.range,
                             detection.ftcPose.bearing, detection.ftcPose.yaw,
                             detection.ftcPose.roll);
-                    if (redTarget) {
+                    if (redTarget
+                            && cluster.percentClusterFound >= TARGET_MIN_CLUSTER_VISIBILITY_PERCENT) {
                         redTargetVisible = true;
                         if (Double.isNaN(closestRoll)
                                 || Math.abs(detection.ftcPose.roll) < Math.abs(closestRoll)) {
@@ -306,7 +332,6 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
             }
             AprilTagSingleDetection single = (AprilTagSingleDetection) detection;
             String name = single.metadata == null ? "unknown" : single.metadata.name;
-            boolean redTarget = single.id >= 30 && single.id <= 37;
             if (detection.ftcPose == null) {
                 telemetry.addData("Tag " + single.id, name);
             } else {
@@ -315,37 +340,67 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                         name, detection.ftcPose.range,
                         detection.ftcPose.bearing, detection.ftcPose.yaw,
                         detection.ftcPose.roll);
-                if (redTarget) {
-                    redTargetVisible = true;
-                    if (Double.isNaN(closestRoll)
-                            || Math.abs(detection.ftcPose.roll) < Math.abs(closestRoll)) {
-                        closestRoll = detection.ftcPose.roll;
-                        closestRedTarget = single.id <= 33 ? "RED SCORING" : "RED AUDIENCE";
-                    }
-                    redTargetAligned |= Math.abs(detection.ftcPose.roll)
-                            <= RED_TARGET_UPRIGHT_ROLL_TOLERANCE_DEGREES;
-                }
+                // A single sub-tag has no cluster visibility percentage. Show it in
+                // telemetry, but require a cluster detection to activate the light.
             }
         }
         if (redTargetAligned) {
-            telemetry.addData("Red orientation", "%s UPRIGHT (roll=%+.1f)",
+            telemetry.addData(targetAllianceName() + " orientation", "%s UPRIGHT (roll=%+.1f)",
                     closestRedTarget, closestRoll);
         } else if (redTargetVisible) {
-            telemetry.addData("Red orientation", "%s visible; roll=%+.1f (need ±%.0f)",
+            telemetry.addData(targetAllianceName() + " orientation", "%s visible; roll=%+.1f (need ±%.0f)",
                     closestRedTarget, closestRoll,
                     RED_TARGET_UPRIGHT_ROLL_TOLERANCE_DEGREES);
         } else {
-            telemetry.addLine("Red orientation: RED SCORING / RED AUDIENCE not visible");
+            telemetry.addData(targetAllianceName() + " orientation",
+                    targetTagDescription() + " not visible");
         }
+        telemetry.addData("Light visibility requirement", ">= %d%% of target cluster",
+                TARGET_MIN_CLUSTER_VISIBILITY_PERCENT);
         return redTargetAligned;
     }
 
-    // RED/GREEN/BLUE are pushed on top of the hub's own status pattern and popped
-    // for OFF, so the normal status blink shows whenever the light is off. The
-    // external RGB light has PWM disabled for OFF so it goes physically dark.
+    protected String targetAllianceName() {
+        return "RED";
+    }
+
+    protected String targetTagDescription() {
+        return "RED SCORING / RED AUDIENCE";
+    }
+
+    protected boolean isTargetCluster(String name) {
+        return name.equalsIgnoreCase("RED SCORING")
+                || name.equalsIgnoreCase("RED AUDIENCE");
+    }
+
+    protected boolean isTargetSingleTag(int id) {
+        return id >= 30 && id <= 37;
+    }
+
+    protected String targetNameForSingleTag(int id) {
+        return id <= 33 ? "RED SCORING" : "RED AUDIENCE";
+    }
+
+    private void updateArm() {
+        if (gobildaLightServos == null) return;
+
+        // Ignore contradictory input so pressing both buttons cannot make the arm jump.
+        if (gamepad2.x && !gamepad2.y) {
+            armPosition = ARM_LOWER_POSITION;
+            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+        } else if (gamepad2.y && !gamepad2.x) {
+            armPosition = ARM_RAISE_POSITION;
+            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+        }
+    }
+
+    // Keep an explicit pattern on the hubs while TeleOp is active. Restoring their
+    // normal status pattern for OFF can look like a camera-positive green light.
+    // Position commands enable only their target ports; do not globally enable
+    // unconfigured servo ports on the Expansion Hub.
     private void showLight(Light light) {
         boolean changed = light != currentLight;
-        boolean hadPattern = currentLight != null && currentLight != Light.OFF;
+        boolean hadPattern = currentLight != null;
         currentLight = light;
         if (changed) {
             for (LynxModule hub : hubs) {
@@ -358,6 +413,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                     hub.pushPattern(SOLID_GREEN);
                 } else if (light == Light.BLUE) {
                     hub.pushPattern(SOLID_BLUE);
+                } else {
+                    hub.pushPattern(SOLID_OFF);
                 }
             }
             if (light == Light.RED) {
@@ -373,9 +430,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         if (gobildaLightServos != null) {
             if (light == Light.OFF) {
                 gobildaLightServos.setServoPosition(GOBILDA_LIGHT_PORT, GOBILDA_OFF);
-                gobildaLightServos.pwmDisable();
             } else {
-                gobildaLightServos.pwmEnable();
                 gobildaLightServos.setServoPosition(GOBILDA_LIGHT_PORT,
                         light == Light.RED ? GOBILDA_RED
                                 : light == Light.GREEN ? GOBILDA_GREEN : GOBILDA_BLUE);
