@@ -99,19 +99,13 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
     private static final double RED_INTAKE_X_INCHES = -5.59;
-    private static final double RED_INTAKE_Y_INCHES = -48.22;
+    private static final double RED_INTAKE_Y_INCHES = -45.22;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
-    private static final double RED_INTAKE_FINAL_FORWARD_SECONDS = 0.9;
-    private static final double RED_INTAKE_AFTER_DRIVE_SECONDS = 0.5;
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int ARM_SERVO_PORT = 1;
     private static final double ARM_DOWN_POSITION = 1.0;
     private static final long ARM_LOWER_SETTLE_MS = 500;
-    private static final double INTAKE_JIGGLE_DISTANCE_INCHES = 3.0;
-    private static final int INTAKE_JIGGLE_CYCLES = 3;
-    private static final double INTAKE_JIGGLE_POWER = 0.35;
-    private static final double INTAKE_JIGGLE_TIMEOUT_SECONDS = 1.5;
     private static final double SECOND_SHOOTING_X_INCHES = -120.56;
     private static final double SECOND_SHOOTING_Y_INCHES = -21.04;
     private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -149.7;
@@ -323,9 +317,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         true,
                         RED_INTAKE_POSITION_TIMEOUT_SECONDS)) return;
                 lowerArmForIntake();
-                if (!driveForwardTimedWithIntake(
-                        RED_INTAKE_FINAL_FORWARD_SECONDS)) return;
-                if (!runIntakeJiggle()) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
                 runIntakeDuringPath = false;
                 stopIntake();
@@ -335,13 +326,10 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!followFastSecondShootingPath()) return;
                 if (!waitForSecondShotTarget()) {
                     if (!opModeIsActive()) return;
-                    shooter.setVelocity(0);
-                    shootingState = "TAG TIMEOUT - DRIVING TO PARK";
-                    RobotLog.ww(TAG, "SECOND_SHOT_TAG_TIMEOUT id=%s target=%s; skipping shot",
+                    shootingState = "TAG TIMEOUT - SHOOTING FROM RECORDED POSITION";
+                    RobotLog.ww(TAG,
+                            "SECOND_SHOT_TAG_TIMEOUT id=%s target=%s; shooting anyway",
                             runId, secondShotTargetName());
-                    if (!parkTwoFeetRobotLeft()) return;
-                    shootingState = "PARKED AFTER TAG TIMEOUT";
-                    return;
                 }
                 if (!waitForShooterSpinup()) return;
                 // Same four-ball timed feed routine used at the starting pose.
@@ -858,81 +846,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         RobotLog.ii(TAG, "INTAKE_CONTINUOUS id=%s pose=(%.2f,%.2f,%.1f) "
                         + "using=left+right+center",
                 runId, x, y, Math.toDegrees(heading));
-        return opModeIsActive();
-    }
-
-    private boolean driveForwardTimedWithIntake(double seconds) {
-        ElapsedTime timer = new ElapsedTime();
-        RobotLog.ii(TAG, "TIMED_INTAKE_START id=%s seconds=%.1f pose=(%.2f,%.2f,%.1f)",
-                runId, seconds, x, y, Math.toDegrees(heading));
-        while (opModeIsActive() && timer.seconds() < seconds) {
-            startIntake();
-            updatePose();
-            setMecanum(INTAKE_FORWARD_POWER, 0, 0);
-            telemetry.addData("Step", "Forward with intake for %.1f seconds", seconds);
-            telemetry.addData("Time", "%.1f / %.1f sec", timer.seconds(), seconds);
-            telemetry.addData("Pose X / Y", "%+.1f / %+.1f in", x, y);
-            telemetry.addData("Heading", "%+.1f deg", Math.toDegrees(heading));
-            telemetry.update();
-            idle();
-        }
-        stopDrive();
-        updatePose();
-        ElapsedTime intakeOnlyTimer = new ElapsedTime();
-        while (opModeIsActive()
-                && intakeOnlyTimer.seconds() < RED_INTAKE_AFTER_DRIVE_SECONDS) {
-            startIntake();
-            telemetry.addData("Step", "Stopped; intake still running");
-            telemetry.addData("Intake time", "%.1f / %.1f sec",
-                    intakeOnlyTimer.seconds(), RED_INTAKE_AFTER_DRIVE_SECONDS);
-            telemetry.update();
-            idle();
-        }
-        RobotLog.ii(TAG, "TIMED_INTAKE_END id=%s elapsed=%.2f pose=(%.2f,%.2f,%.1f)",
-                runId, timer.seconds(), x, y, Math.toDegrees(heading));
-        return opModeIsActive();
-    }
-
-    private boolean runIntakeJiggle() {
-        RobotLog.ii(TAG, "INTAKE_JIGGLE_START id=%s cycles=%d distance=%.1f",
-                runId, INTAKE_JIGGLE_CYCLES, INTAKE_JIGGLE_DISTANCE_INCHES);
-        for (int cycle = 1; cycle <= INTAKE_JIGGLE_CYCLES; cycle++) {
-            if (!driveIntakeJiggleDistance(-INTAKE_JIGGLE_DISTANCE_INCHES,
-                    cycle, "BACK")) return false;
-            if (!driveIntakeJiggleDistance(INTAKE_JIGGLE_DISTANCE_INCHES,
-                    cycle, "FORWARD")) return false;
-        }
-        RobotLog.ii(TAG, "INTAKE_JIGGLE_END id=%s pose=(%.2f,%.2f,%.1f)",
-                runId, x, y, Math.toDegrees(heading));
-        return opModeIsActive();
-    }
-
-    private boolean driveIntakeJiggleDistance(double distanceInches,
-                                               int cycle, String directionName) {
-        int startingRightTicks = readRight();
-        double direction = Math.signum(distanceInches);
-        double targetDistance = Math.abs(distanceInches);
-        ElapsedTime timer = new ElapsedTime();
-
-        while (opModeIsActive() && timer.seconds() < INTAKE_JIGGLE_TIMEOUT_SECONDS) {
-            startIntake();
-            updatePose();
-            double signedDistance =
-                    (readRight() - startingRightTicks) / RIGHT_TICKS_PER_INCH;
-            double progress = signedDistance * direction;
-            if (progress >= targetDistance - INTAKE_FORWARD_TOLERANCE_INCHES) {
-                break;
-            }
-            setMecanum(direction * INTAKE_JIGGLE_POWER, 0, 0);
-            telemetry.addData("Step", "Intake jiggle %d/%d %s",
-                    cycle, INTAKE_JIGGLE_CYCLES, directionName);
-            telemetry.addData("Distance", "%.1f / %.1f in",
-                    Math.max(0.0, progress), targetDistance);
-            telemetry.update();
-            idle();
-        }
-        stopDrive();
-        updatePose();
         return opModeIsActive();
     }
 
