@@ -335,9 +335,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 // directly to the second-shot speed without stopping it.
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
-                stopIntake();
                 windmill.setPower(-1.0);
-                shootingState = "SECOND POSITION - WINDMILL RUNNING";
+                shootingState = "SECOND POSITION - INTAKE + WINDMILL RUNNING";
                 if (!waitForSecondShotTarget()) {
                     if (!opModeIsActive()) return;
                     shootingState = "TAG TIMEOUT - SHOOTING FROM RECORDED POSITION";
@@ -349,6 +348,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 // Same four-ball timed feed routine used at the starting pose.
                 runShooterAndWindmill(true);
                 shooter.setVelocity(0);
+                stopIntake();
                 raiseArmForParking();
                 shootingState = "DRIVING TO PARK";
                 if (!parkTwoFeetRobotLeft()) return;
