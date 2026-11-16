@@ -98,7 +98,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -6.59;
+    private static final double RED_INTAKE_X_INCHES = -5.59;
     private static final double RED_INTAKE_Y_INCHES = -49.22;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
