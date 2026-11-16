@@ -299,7 +299,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             if (!waitForShooterSpinup()) return;
             runShooterAndWindmill();
             if (opModeIsActive()) {
-                shooter.setVelocity(0);
                 startIntake();
                 RobotLog.ii(TAG, "INTAKE_START id=%s after_opening_shot=true", runId);
                 shootingState = "INTAKE RUNNING - FOLLOWING RECORDED PATH";
@@ -332,8 +331,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!driveIntakeNudge(-INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
                 runIntakeDuringPath = false;
-                // Spin up only after collection is complete, while driving the
-                // recorded route to the second shooting position.
+                // Keep the shooter spinning throughout collection, then switch
+                // directly to the second-shot speed without stopping it.
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
                 stopIntake();
