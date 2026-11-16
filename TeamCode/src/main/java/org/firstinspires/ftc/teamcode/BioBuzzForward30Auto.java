@@ -106,11 +106,14 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final int ARM_SERVO_PORT = 1;
     private static final double ARM_START_POSITION = 0.0;
     private static final double ARM_DOWN_POSITION = 1.0;
-    private static final long ARM_LOWER_SETTLE_MS = 2000;
+    private static final long ARM_LOWER_SETTLE_MS = 250;
     private static final long ARM_RAISE_SETTLE_MS = 1000;
+    private static final double INTAKE_NUDGE_DISTANCE_INCHES = 1.0;
+    private static final double INTAKE_NUDGE_POWER = 0.30;
+    private static final double INTAKE_NUDGE_TIMEOUT_SECONDS = 1.0;
     private static final double SECOND_SHOOTING_X_INCHES = -121.56;
     private static final double SECOND_SHOOTING_Y_INCHES = -18.04;
-    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = 180.0;
+    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = 195.0;
     private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 2.0;
     private static final double SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS = 2.0;
     // Fresh high-speed curve from the intake area; these are look-ahead points,
@@ -310,6 +313,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         RED_INTAKE_HEADING_DEGREES,
                         "Recorded intake path waypoint 3",
                         2.0, Math.toRadians(6.0), false)) return;
+                beginLoweringArmForIntake();
                 if (!driveToPose(RED_INTAKE_X_INCHES,
                         RED_INTAKE_Y_INCHES,
                         RED_INTAKE_HEADING_DEGREES,
@@ -318,7 +322,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         HEADING_TOLERANCE_RADIANS,
                         true,
                         RED_INTAKE_POSITION_TIMEOUT_SECONDS)) return;
-                lowerArmForIntake();
+                finishLoweringArmForIntake();
+                if (!driveIntakeNudge(INTAKE_NUDGE_DISTANCE_INCHES)) return;
+                if (!driveIntakeNudge(-INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
                 runIntakeDuringPath = false;
                 // Spin up only after collection is complete, while driving the
@@ -869,7 +875,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         rightIntakeServo.setPower(RIGHT_INTAKE_SERVO_POWER);
     }
 
-    private void lowerArmForIntake() {
+    private void beginLoweringArmForIntake() {
         if (gobildaLightServos == null) {
             RobotLog.ww(TAG, "ARM_LOWER_SKIPPED id=%s servo controller missing", runId);
             telemetry.addLine("Arm unavailable; continuing intake sequence.");
@@ -878,7 +884,33 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         }
         gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_DOWN_POSITION);
         RobotLog.ii(TAG, "ARM_LOWERED id=%s position=%.2f", runId, ARM_DOWN_POSITION);
+    }
+
+    private void finishLoweringArmForIntake() {
+        if (gobildaLightServos == null) return;
         sleep(ARM_LOWER_SETTLE_MS);
+    }
+
+    private boolean driveIntakeNudge(double distanceInches) {
+        int startingRightTicks = readRight();
+        double direction = Math.signum(distanceInches);
+        double targetDistance = Math.abs(distanceInches);
+        ElapsedTime timer = new ElapsedTime();
+        while (opModeIsActive() && timer.seconds() < INTAKE_NUDGE_TIMEOUT_SECONDS) {
+            startIntake();
+            double signedDistance =
+                    (readRight() - startingRightTicks) / RIGHT_TICKS_PER_INCH;
+            if (signedDistance * direction
+                    >= targetDistance - INTAKE_FORWARD_TOLERANCE_INCHES) break;
+            setMecanum(direction * INTAKE_NUDGE_POWER, 0, 0);
+            telemetry.addData("Step", "Intake nudge %s 1 inch",
+                    direction > 0 ? "forward" : "backward");
+            telemetry.update();
+            idle();
+        }
+        stopDrive();
+        updatePose();
+        return opModeIsActive();
     }
 
     private void raiseArmForParking() {
