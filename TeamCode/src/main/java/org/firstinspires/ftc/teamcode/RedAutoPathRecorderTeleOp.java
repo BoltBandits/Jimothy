@@ -9,4 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  */
 @TeleOp(name = "Red Auto Path Recorder", group = "Jimothy Calibration")
 public class RedAutoPathRecorderTeleOp extends BioBuzzForward30Auto {
+    @Override
+    protected boolean captureNextPositionAfterIntake() {
+        return true;
+    }
 }

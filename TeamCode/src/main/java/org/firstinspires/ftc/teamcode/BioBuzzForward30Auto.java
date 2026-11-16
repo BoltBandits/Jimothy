@@ -98,7 +98,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -6.59;
+    private static final double RED_INTAKE_X_INCHES = -6.19;
     private static final double RED_INTAKE_Y_INCHES = -48.92;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
@@ -113,19 +113,19 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double INTAKE_NUDGE_TIMEOUT_SECONDS = 1.0;
     // Shifted one additional inch robot-forward and three inches robot-right,
     // treating the intake side as robot-front at the 195-degree heading.
-    private static final double SECOND_SHOOTING_X_INCHES = -130.20;
-    private static final double SECOND_SHOOTING_Y_INCHES = -8.96;
-    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = 195.0;
+    private static final double SECOND_SHOOTING_X_INCHES = -118.26;
+    private static final double SECOND_SHOOTING_Y_INCHES = -10.49;
+    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -178.1;
     private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 2.0;
     private static final double SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS = 2.0;
     // Fresh high-speed curve from the intake area; these are look-ahead points,
     // not stops, and do not replay the hand-pushed recorded route.
-    private static final double FAST_SECOND_PATH_WAYPOINT_1_X = -42.0;
-    private static final double FAST_SECOND_PATH_WAYPOINT_1_Y = -39.0;
-    private static final double FAST_SECOND_PATH_WAYPOINT_1_HEADING = -45.0;
-    private static final double FAST_SECOND_PATH_WAYPOINT_2_X = -86.0;
-    private static final double FAST_SECOND_PATH_WAYPOINT_2_Y = -31.0;
-    private static final double FAST_SECOND_PATH_WAYPOINT_2_HEADING = -115.0;
+    private static final double FAST_SECOND_PATH_WAYPOINT_1_X = -50.58;
+    private static final double FAST_SECOND_PATH_WAYPOINT_1_Y = -33.65;
+    private static final double FAST_SECOND_PATH_WAYPOINT_1_HEADING = 2.6;
+    private static final double FAST_SECOND_PATH_WAYPOINT_2_X = -94.83;
+    private static final double FAST_SECOND_PATH_WAYPOINT_2_Y = -18.08;
+    private static final double FAST_SECOND_PATH_WAYPOINT_2_HEADING = 130.5;
     // The left CR servo is reversed during initialization, so equal command
     // powers make the two intake wheels counter-rotate: left wheel rightward,
     // right wheel leftward, pulling game pieces toward the center.
@@ -163,11 +163,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_POSITION_MAX_HEADING_HOLD_POWER = 0.35;
     private static final double SECOND_SHOOTING_SECONDS = 6.0;
     private static final double WINDMILL_FEED_POWER = -0.20;
-    private static final double FINAL_PARK_LEFT_DISTANCE_INCHES = 24.0;
-    // Compensates for shooting-pose adjustments so the absolute parking
-    // endpoint remains unchanged.
-    private static final double FINAL_PARK_EXTRA_LEFT_INCHES = 14.0;
-    private static final double FINAL_PARK_BACK_DISTANCE_INCHES = 11.0;
+    private static final double FINAL_PARK_X_INCHES = -109.74;
+    private static final double FINAL_PARK_Y_INCHES = -42.82;
     private static final double SHOOTER_P = 40.0;
     private static final double SHOOTER_F = 12.5;
 
@@ -332,7 +329,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!driveIntakeNudge(INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 if (!driveIntakeNudge(-INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
-                if (!recordSecondShootingPathAfterIntake()) return;
+                if (captureNextPositionAfterIntake()
+                        && !recordSecondShootingPathAfterIntake()) return;
                 runIntakeDuringPath = false;
                 // Keep the shooter spinning throughout collection, then switch
                 // directly to the second-shot speed without stopping it.
@@ -445,19 +443,12 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private boolean parkTwoFeetRobotLeft() {
         updatePose();
         double parkHeadingDegrees = Math.toDegrees(heading);
-        double totalLeftDistance = FINAL_PARK_LEFT_DISTANCE_INCHES
-                + FINAL_PARK_EXTRA_LEFT_INCHES;
-        // Robot-back is (-cos, -sin); robot-left is (-sin, cos).
-        double targetX = x - Math.cos(heading) * FINAL_PARK_BACK_DISTANCE_INCHES
-                - Math.sin(heading) * totalLeftDistance;
-        double targetY = y - Math.sin(heading) * FINAL_PARK_BACK_DISTANCE_INCHES
-                + Math.cos(heading) * totalLeftDistance;
         RobotLog.ii(TAG,
                 "RELATIVE_PARK_LEFT id=%s start=(%.2f,%.2f,%.1f) target=(%.2f,%.2f,%.1f)",
                 runId, x, y, parkHeadingDegrees,
-                targetX, targetY, parkHeadingDegrees);
-        return driveToPose(targetX, targetY, parkHeadingDegrees,
-                "Park: 11 inches back, 38 inches robot-left",
+                FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES, parkHeadingDegrees);
+        return driveToPose(FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
+                parkHeadingDegrees, "Park at preserved field position",
                 2.0, Math.toRadians(5.0), true);
     }
 
