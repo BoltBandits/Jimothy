@@ -18,6 +18,5 @@
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>
-    <Webcam name="Webcam 1" serialNumber="SN0001" />
-    <EthernetDevice name="limelight" serialNumber="EthernetOverUsb:eth0:172.29.0.1" ipAddress="172.29.0.1" />
+    <Webcam name="Webcam 1" serialNumber="7F180580" />
 </Robot>

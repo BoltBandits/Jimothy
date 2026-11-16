@@ -221,7 +221,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         windmill = hardwareMap.get(CRServo.class, "windmill_servo");
         leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
         rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        // Limelight is optional; autonomous continues with odometry and the USB
+        // webcam when the Limelight is disconnected or absent from the config.
+        limelight = hardwareMap.tryGet(Limelight3A.class, "limelight");
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -244,8 +246,12 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
         leftIntakeServo.setPower(0);
         rightIntakeServo.setPower(0);
-        limelight.pipelineSwitch(LIMELIGHT_PIPELINE);
-        limelight.start();
+        if (limelight != null) {
+            limelight.pipelineSwitch(LIMELIGHT_PIPELINE);
+            limelight.start();
+        } else {
+            telemetry.addLine("Limelight disconnected; using odometry/webcam only.");
+        }
         aprilTags = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getBioBuzzTagLibrary())
                 .build();
@@ -940,6 +946,12 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     }
 
     private boolean alignToPollenColumn() {
+        if (limelight == null) {
+            RobotLog.ii(TAG, "VISION_ALIGN_SKIPPED id=%s Limelight disconnected", runId);
+            telemetry.addLine("Limelight disconnected; skipping pollen alignment.");
+            telemetry.update();
+            return true;
+        }
         final double targetHeading = Math.toRadians(SECOND_SHOOTING_HEADING_DEGREES);
         final double holdY = y;
         ElapsedTime timer = new ElapsedTime();
@@ -1188,6 +1200,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     }
 
     private void logSecondApproachPollen() {
+        if (limelight == null) return;
         if (limelightLogTimer.milliseconds() < 100) return;
         limelightLogTimer.reset();
 

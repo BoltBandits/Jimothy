@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Blinker;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -62,21 +63,26 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private static final String TAG = "TeleopV6";
     private static final double LOG_PERIOD_S = 0.25;
     private static final double DRIVE_DEADZONE = 0.15;
-    // Disabled until the unstable USB webcam connection is repaired. Keeping
-    // VisionPortal closed prevents FTC's camera-reopen crash from killing the RC app.
-    private static final boolean USB_WEBCAM_ENABLED = false;
+    // Enable the webcam-backed AprilTag alignment system.
+    private static final boolean USB_WEBCAM_ENABLED = true;
     private static final double RED_TARGET_UPRIGHT_ROLL_TOLERANCE_DEGREES = 8.0;
     private static final int TARGET_MIN_CLUSTER_VISIBILITY_PERCENT = 50;
     public static final double LAUNCHER_EJECT_VELOCITY = 35;
-    // The windmill feeds, and the lights turn green, above this fraction of full speed.
-    public static final double WINDMILL_FEED_MIN_SPEED_FRACTION = 0.35;
+    // Start/resume feeding near the commanded shooter speed, then pause after a
+    // ball if velocity drops far enough to affect shot consistency. Separate
+    // thresholds provide hysteresis so the windmill does not rapidly chatter.
+    public static final double WINDMILL_FEED_READY_FRACTION_OF_TARGET = 0.97;
+    public static final double WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET = 0.92;
     private static final double WINDMILL_CONTINUOUS_POWER = -1.0;
     // goBILDA RGB Indicator Light (same positions as Light Test / Shooter Test).
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int GOBILDA_LIGHT_PORT = 0;
     private static final int ARM_SERVO_PORT = 1;
-    private static final double ARM_LOWER_POSITION = 0.0;
-    private static final double ARM_RAISE_POSITION = 1.0;
+    // Y returns the arm to its starting position; X moves it through the servo's
+    // full 180-degree range to the down position.
+    private static final double ARM_START_POSITION = 0.0;
+    private static final double ARM_DOWN_POSITION = 1.0;
+    private static final double ARM_CALIBRATION_STEP = 0.01;
     private static final double GOBILDA_OFF = 0.0;
     private static final double GOBILDA_RED = 0.279;
     private static final double GOBILDA_GREEN = 0.500;
@@ -107,7 +113,6 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     protected double launcherNormalVelocity;
     protected double launcherTurboVelocity;
     protected double launcherTargetVelocity;
-    private double feedMinVelocity;
     protected boolean turbo;
     protected boolean lastTurbo;
     private final ElapsedTime logTimer = new ElapsedTime();
@@ -121,6 +126,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private double windmillPower;
     private boolean windmillFeedArmed;
     private double armPosition = Double.NaN;
+    private boolean lastArmDpadLeft;
+    private boolean lastArmDpadRight;
 
     private enum Light { OFF, RED, GREEN, BLUE }
     // null until the first loop so the lights are always set once.
@@ -191,8 +198,6 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         launcherTargetVelocity = launcherNormalVelocity;
         RobotLog.ii(TAG, "init max=%.0f normal=%.0f turbo=%.0f ticks/s", launcherMaxVelocity,
                 launcherNormalVelocity, launcherTurboVelocity);
-        feedMinVelocity = WINDMILL_FEED_MIN_SPEED_FRACTION * launcherMaxVelocity;
-
         if (leftIntakeServo != null) {
             leftIntakeServo.setPower(0.0);
             leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -230,13 +235,16 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         updateTurbo();
         launch();
         double launcherVelocity = launcher == null ? 0.0 : launcher.getVelocity();
-        boolean launcherFastEnough = launcherVelocity > feedMinVelocity;
+        double feedReadyVelocity = WINDMILL_FEED_READY_FRACTION_OF_TARGET
+                * launcherTargetVelocity;
+        double feedPauseVelocity = WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET
+                * launcherTargetVelocity;
         boolean shooting = gamepad2.right_bumper || turbo;
         if (!shooting) {
             windmillFeedArmed = false;
-        } else if (launcherFastEnough) {
-            // Once the shooter reaches speed, keep feeding until the driver
-            // releases the shoot command even if velocity dips after a ball.
+        } else if (windmillFeedArmed && launcherVelocity < feedPauseVelocity) {
+            windmillFeedArmed = false;
+        } else if (!windmillFeedArmed && launcherVelocity >= feedReadyVelocity) {
             windmillFeedArmed = true;
         }
         if (shooting && logTimer.seconds() >= LOG_PERIOD_S) {
@@ -270,10 +278,14 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                 shooterSettingLabel(), 100.0 * launcherTargetVelocity / launcherMaxVelocity,
                 launcherMaxVelocity, shooterSettingsDescription());
         telemetry.addData("Windmill feed", !shooting ? "-"
-                : windmillFeedArmed ? "FEEDING CONTINUOUSLY" : "WAITING FOR SPEED");
+                : windmillFeedArmed ? "FEEDING"
+                : String.format("WAITING (need %.0f, pause below %.0f)",
+                        feedReadyVelocity, feedPauseVelocity));
         telemetry.addData("Intake motor / servos / windmill", "%.2f / %.2f / %.2f", intakePower, intakeServoPower, windmillPower);
-        telemetry.addData("Arm", Double.isNaN(armPosition) ? "not commanded (gp2 X=lower, Y=raise)"
-                : String.format("%.2f (gp2 X=lower, Y=raise)", armPosition));
+        telemetry.addData("Arm", Double.isNaN(armPosition)
+                ? "not commanded (gp2 D-pad left/right calibrates)"
+                : String.format("%.2f (D-pad left/right calibrates; X=down, Y=start)",
+                        armPosition));
         boolean targetAligned = showAprilTags();
         showLight(targetAligned ? Light.GREEN : Light.OFF);
         telemetry.addData("Lights", "%s (requires visible upright %s AprilTag)",
@@ -384,12 +396,28 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private void updateArm() {
         if (gobildaLightServos == null) return;
 
+        boolean dpadLeftPressed = gamepad2.dpad_left && !lastArmDpadLeft;
+        boolean dpadRightPressed = gamepad2.dpad_right && !lastArmDpadRight;
+        lastArmDpadLeft = gamepad2.dpad_left;
+        lastArmDpadRight = gamepad2.dpad_right;
+
+        if (dpadLeftPressed != dpadRightPressed) {
+            if (Double.isNaN(armPosition)) {
+                armPosition = gobildaLightServos.getServoPosition(ARM_SERVO_PORT);
+            }
+            armPosition = Range.clip(armPosition
+                    + (dpadRightPressed ? ARM_CALIBRATION_STEP : -ARM_CALIBRATION_STEP),
+                    0.0, 1.0);
+            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+            return;
+        }
+
         // Ignore contradictory input so pressing both buttons cannot make the arm jump.
         if (gamepad2.x && !gamepad2.y) {
-            armPosition = ARM_LOWER_POSITION;
+            armPosition = ARM_DOWN_POSITION;
             gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
         } else if (gamepad2.y && !gamepad2.x) {
-            armPosition = ARM_RAISE_POSITION;
+            armPosition = ARM_START_POSITION;
             gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
         }
     }
