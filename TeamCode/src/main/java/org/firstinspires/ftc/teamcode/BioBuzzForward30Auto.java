@@ -98,14 +98,16 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -8.59;
+    private static final double RED_INTAKE_X_INCHES = -6.59;
     private static final double RED_INTAKE_Y_INCHES = -49.22;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int ARM_SERVO_PORT = 1;
+    private static final double ARM_START_POSITION = 0.0;
     private static final double ARM_DOWN_POSITION = 1.0;
     private static final long ARM_LOWER_SETTLE_MS = 2000;
+    private static final long ARM_RAISE_SETTLE_MS = 1000;
     private static final double SECOND_SHOOTING_X_INCHES = -120.56;
     private static final double SECOND_SHOOTING_Y_INCHES = -21.04;
     private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -149.7;
@@ -319,11 +321,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 lowerArmForIntake();
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
                 runIntakeDuringPath = false;
-                stopIntake();
                 // Spin up only after collection is complete, while driving the
                 // recorded route to the second shooting position.
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
+                stopIntake();
                 if (!waitForSecondShotTarget()) {
                     if (!opModeIsActive()) return;
                     shootingState = "TAG TIMEOUT - SHOOTING FROM RECORDED POSITION";
@@ -335,6 +337,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 // Same four-ball timed feed routine used at the starting pose.
                 runShooterAndWindmill(true);
                 shooter.setVelocity(0);
+                raiseArmForParking();
                 shootingState = "DRIVING TO PARK";
                 if (!parkTwoFeetRobotLeft()) return;
                 shootingState = "PARKED";
@@ -876,6 +879,16 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_DOWN_POSITION);
         RobotLog.ii(TAG, "ARM_LOWERED id=%s position=%.2f", runId, ARM_DOWN_POSITION);
         sleep(ARM_LOWER_SETTLE_MS);
+    }
+
+    private void raiseArmForParking() {
+        if (gobildaLightServos == null) {
+            RobotLog.ww(TAG, "ARM_RAISE_SKIPPED id=%s servo controller missing", runId);
+            return;
+        }
+        gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_START_POSITION);
+        RobotLog.ii(TAG, "ARM_RAISED id=%s position=%.2f", runId, ARM_START_POSITION);
+        sleep(ARM_RAISE_SETTLE_MS);
     }
 
     private boolean alignToPollenColumn() {

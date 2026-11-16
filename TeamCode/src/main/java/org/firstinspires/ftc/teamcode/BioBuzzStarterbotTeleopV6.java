@@ -74,7 +74,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     public static final double WINDMILL_FEED_READY_FRACTION_OF_TARGET = 0.97;
     public static final double WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET = 0.92;
     // Give each ball time to settle into a windmill pocket before advancing.
-    private static final double WINDMILL_CONTINUOUS_POWER = -0.25;
+    private static final double WINDMILL_CONTINUOUS_POWER = -0.125;
     // goBILDA RGB Indicator Light (same positions as Light Test / Shooter Test).
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int GOBILDA_LIGHT_PORT = 0;
