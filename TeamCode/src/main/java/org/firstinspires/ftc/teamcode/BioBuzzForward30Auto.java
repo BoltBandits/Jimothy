@@ -108,9 +108,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double ARM_DOWN_POSITION = 1.0;
     private static final long ARM_LOWER_SETTLE_MS = 2000;
     private static final long ARM_RAISE_SETTLE_MS = 1000;
-    private static final double SECOND_SHOOTING_X_INCHES = -120.56;
-    private static final double SECOND_SHOOTING_Y_INCHES = -21.04;
-    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -149.7;
+    private static final double SECOND_SHOOTING_X_INCHES = -121.56;
+    private static final double SECOND_SHOOTING_Y_INCHES = -18.04;
+    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = 180.0;
     private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 2.0;
     private static final double SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS = 2.0;
     // Fresh high-speed curve from the intake area; these are look-ahead points,
