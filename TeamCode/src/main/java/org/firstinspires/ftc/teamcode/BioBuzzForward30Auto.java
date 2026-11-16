@@ -332,6 +332,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!driveIntakeNudge(INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 if (!driveIntakeNudge(-INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
+                if (!recordSecondShootingPathAfterIntake()) return;
                 runIntakeDuringPath = false;
                 // Keep the shooter spinning throughout collection, then switch
                 // directly to the second-shot speed without stopping it.
@@ -922,6 +923,68 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         stopDrive();
         updatePose();
         return opModeIsActive();
+    }
+
+    private boolean recordSecondShootingPathAfterIntake() {
+        stopDrive();
+        stopIntake();
+        shooter.setVelocity(0);
+        windmill.setPower(0);
+        shootingState = "PUSH TO SECOND SHOOTING POSITION";
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        syncPodBaselines();
+
+        ElapsedTime pathTimer = new ElapsedTime();
+        ElapsedTime pathLogTimer = new ElapsedTime();
+        RobotLog.ii(TAG, "SECOND_SHOOTING_PATH_START id=%s pose=(%.2f,%.2f,%.1f)",
+                runId, x, y, Math.toDegrees(heading));
+
+        while (opModeIsActive() && !gamepad1.b) {
+            updatePose();
+            stopDrive();
+            if (pathLogTimer.milliseconds() >= 100) {
+                RobotLog.ii(TAG,
+                        "SECOND_SHOOTING_PATH id=%s time=%.2f x=%.2f y=%.2f heading=%.1f",
+                        runId, pathTimer.seconds(), x, y, Math.toDegrees(heading));
+                pathLogTimer.reset();
+            }
+            telemetry.addData("Mode", "PUSH TO SECOND SHOOTING POSITION");
+            telemetry.addData("X forward", "%+.2f in", x);
+            telemetry.addData("Y left", "%+.2f in", y);
+            telemetry.addData("Heading CCW", "%+.1f deg", Math.toDegrees(heading));
+            telemetry.addLine("Press B to capture the final pose");
+            telemetry.addLine("No timeout - waits until B or Stop");
+            telemetry.update();
+            idle();
+        }
+        if (!opModeIsActive()) return false;
+
+        updatePose();
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        stopDrive();
+        RobotLog.ii(TAG,
+                "SECOND_SHOOTING_POSE id=%s time=%.2f x=%.2f y=%.2f heading=%.1f",
+                runId, pathTimer.seconds(), x, y, Math.toDegrees(heading));
+
+        while (opModeIsActive()) {
+            stopDrive();
+            telemetry.addData("Mode", "SECOND SHOOTING POSE CAPTURED");
+            telemetry.addData("RECORDED X forward", "%+.2f in", x);
+            telemetry.addData("RECORDED Y left", "%+.2f in", y);
+            telemetry.addData("RECORDED heading CCW", "%+.1f deg",
+                    Math.toDegrees(heading));
+            telemetry.addLine("Write down these values, then press Stop");
+            telemetry.update();
+            idle();
+        }
+        return false;
     }
 
     private void raiseArmForParking() {
