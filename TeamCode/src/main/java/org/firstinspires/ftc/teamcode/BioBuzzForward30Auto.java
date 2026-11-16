@@ -162,6 +162,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_POSITION_HEADING_HOLD_KP = 1.50;
     private static final double SECOND_POSITION_MAX_HEADING_HOLD_POWER = 0.35;
     private static final double SECOND_SHOOTING_SECONDS = 6.0;
+    private static final double WINDMILL_FEED_POWER = -0.50;
     private static final double FINAL_PARK_LEFT_DISTANCE_INCHES = 24.0;
     // Compensates for shooting-pose adjustments so the absolute parking
     // endpoint remains unchanged.
@@ -336,7 +337,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 // directly to the second-shot speed without stopping it.
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
-                windmill.setPower(-1.0);
+                windmill.setPower(WINDMILL_FEED_POWER);
                 shootingState = "SECOND POSITION - INTAKE + WINDMILL RUNNING";
                 if (!waitForSecondShotTarget()) {
                     if (!opModeIsActive()) return;
@@ -516,7 +517,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             boolean readyToFeed = actualVelocity >= activeShooterReadyVelocity;
             // -1.0 is the CR servo's maximum available software speed.
             boolean feeding = forceWindmillFeed || readyToFeed;
-            windmill.setPower(feeding ? -1.0 : 0.0);
+            windmill.setPower(feeding ? WINDMILL_FEED_POWER : 0.0);
             telemetry.addData("Step", "Continuous shooting");
             telemetry.addData("Shooting time", "%.1f / %.1f sec",
                     shootingTimer.seconds(), SHOOTING_SECONDS);
@@ -572,7 +573,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
         stopDrive();
         shootingState = "SECOND SHOOTING - INTAKE RUNNING";
-        windmill.setPower(-1);
+        windmill.setPower(WINDMILL_FEED_POWER);
         ElapsedTime timer = new ElapsedTime();
 
         while (opModeIsActive() && timer.seconds() < SECOND_SHOOTING_SECONDS) {
