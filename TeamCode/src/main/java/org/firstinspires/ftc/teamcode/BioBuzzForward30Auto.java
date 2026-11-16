@@ -98,14 +98,14 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -5.59;
-    private static final double RED_INTAKE_Y_INCHES = -45.22;
+    private static final double RED_INTAKE_X_INCHES = -8.59;
+    private static final double RED_INTAKE_Y_INCHES = -49.22;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int ARM_SERVO_PORT = 1;
     private static final double ARM_DOWN_POSITION = 1.0;
-    private static final long ARM_LOWER_SETTLE_MS = 500;
+    private static final long ARM_LOWER_SETTLE_MS = 2000;
     private static final double SECOND_SHOOTING_X_INCHES = -120.56;
     private static final double SECOND_SHOOTING_Y_INCHES = -21.04;
     private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -149.7;
