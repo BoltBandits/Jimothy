@@ -161,6 +161,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_POSITION_MAX_HEADING_HOLD_POWER = 0.35;
     private static final double SECOND_SHOOTING_SECONDS = 6.0;
     private static final double FINAL_PARK_LEFT_DISTANCE_INCHES = 24.0;
+    private static final double FINAL_PARK_EXTRA_LEFT_INCHES = 3.0;
+    private static final double FINAL_PARK_BACK_DISTANCE_INCHES = 5.0;
     private static final double SHOOTER_P = 40.0;
     private static final double SHOOTER_F = 12.5;
 
@@ -436,16 +438,19 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private boolean parkTwoFeetRobotLeft() {
         updatePose();
         double parkHeadingDegrees = Math.toDegrees(heading);
-        // Robot-left unit vector in field coordinates is
-        // (-sin(heading), cos(heading)).
-        double targetX = x - Math.sin(heading) * FINAL_PARK_LEFT_DISTANCE_INCHES;
-        double targetY = y + Math.cos(heading) * FINAL_PARK_LEFT_DISTANCE_INCHES;
+        double totalLeftDistance = FINAL_PARK_LEFT_DISTANCE_INCHES
+                + FINAL_PARK_EXTRA_LEFT_INCHES;
+        // Robot-back is (-cos, -sin); robot-left is (-sin, cos).
+        double targetX = x - Math.cos(heading) * FINAL_PARK_BACK_DISTANCE_INCHES
+                - Math.sin(heading) * totalLeftDistance;
+        double targetY = y - Math.sin(heading) * FINAL_PARK_BACK_DISTANCE_INCHES
+                + Math.cos(heading) * totalLeftDistance;
         RobotLog.ii(TAG,
                 "RELATIVE_PARK_LEFT id=%s start=(%.2f,%.2f,%.1f) target=(%.2f,%.2f,%.1f)",
                 runId, x, y, parkHeadingDegrees,
                 targetX, targetY, parkHeadingDegrees);
         return driveToPose(targetX, targetY, parkHeadingDegrees,
-                "Park: 24 inches robot-left",
+                "Park: 5 inches back, 27 inches robot-left",
                 2.0, Math.toRadians(5.0), true);
     }
 
