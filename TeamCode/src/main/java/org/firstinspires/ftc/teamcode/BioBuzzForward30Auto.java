@@ -336,6 +336,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 startShooter(secondShooterVelocity);
                 if (!followFastSecondShootingPath()) return;
                 stopIntake();
+                windmill.setPower(-1.0);
+                shootingState = "SECOND POSITION - WINDMILL RUNNING";
                 if (!waitForSecondShotTarget()) {
                     if (!opModeIsActive()) return;
                     shootingState = "TAG TIMEOUT - SHOOTING FROM RECORDED POSITION";
