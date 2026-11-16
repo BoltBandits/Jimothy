@@ -111,10 +111,10 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double INTAKE_NUDGE_DISTANCE_INCHES = 1.0;
     private static final double INTAKE_NUDGE_POWER = 0.30;
     private static final double INTAKE_NUDGE_TIMEOUT_SECONDS = 1.0;
-    // Shifted one additional inch robot-forward and one inch robot-right at
-    // the 195-degree shooting heading based on the latest field run.
-    private static final double SECOND_SHOOTING_X_INCHES = -127.68;
-    private static final double SECOND_SHOOTING_Y_INCHES = -14.50;
+    // Shifted three additional inches robot-right, treating the intake side as
+    // robot-front at the 195-degree shooting heading.
+    private static final double SECOND_SHOOTING_X_INCHES = -128.46;
+    private static final double SECOND_SHOOTING_Y_INCHES = -11.60;
     private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = 195.0;
     private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 2.0;
     private static final double SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS = 2.0;
@@ -166,7 +166,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double FINAL_PARK_LEFT_DISTANCE_INCHES = 24.0;
     // Compensates for shooting-pose adjustments so the absolute parking
     // endpoint remains unchanged.
-    private static final double FINAL_PARK_EXTRA_LEFT_INCHES = 8.0;
+    private static final double FINAL_PARK_EXTRA_LEFT_INCHES = 11.0;
     private static final double FINAL_PARK_BACK_DISTANCE_INCHES = 10.0;
     private static final double SHOOTER_P = 40.0;
     private static final double SHOOTER_F = 12.5;
@@ -456,7 +456,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 runId, x, y, parkHeadingDegrees,
                 targetX, targetY, parkHeadingDegrees);
         return driveToPose(targetX, targetY, parkHeadingDegrees,
-                "Park: 10 inches back, 32 inches robot-left",
+                "Park: 10 inches back, 35 inches robot-left",
                 2.0, Math.toRadians(5.0), true);
     }
 
