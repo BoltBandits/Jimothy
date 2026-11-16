@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Gamepad 1: left stick drive/strafe, right stick turn.
  * Gamepad 2: right trigger intake, left trigger reverse,
- *            right bumper shoot (launcher, then windmill above 35%), left bumper eject,
+ *            right bumper shoot (launcher, then windmill at speed), left bumper eject,
  *            A (hold) turbo shoot at 61.79976%, X lower arm, Y raise arm.
  */
 @TeleOp(name = "Jimothy TeleOp", group = "Jimothy")
@@ -73,7 +73,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     // thresholds provide hysteresis so the windmill does not rapidly chatter.
     public static final double WINDMILL_FEED_READY_FRACTION_OF_TARGET = 0.97;
     public static final double WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET = 0.92;
-    private static final double WINDMILL_CONTINUOUS_POWER = -1.0;
+    // Give each ball time to settle into a windmill pocket before advancing.
+    private static final double WINDMILL_CONTINUOUS_POWER = -0.50;
     // goBILDA RGB Indicator Light (same positions as Light Test / Shooter Test).
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int GOBILDA_LIGHT_PORT = 0;

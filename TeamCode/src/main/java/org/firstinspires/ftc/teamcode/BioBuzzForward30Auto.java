@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -103,6 +104,10 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
     private static final double RED_INTAKE_FINAL_FORWARD_SECONDS = 0.9;
     private static final double RED_INTAKE_AFTER_DRIVE_SECONDS = 0.5;
+    private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
+    private static final int ARM_SERVO_PORT = 1;
+    private static final double ARM_DOWN_POSITION = 1.0;
+    private static final long ARM_LOWER_SETTLE_MS = 500;
     private static final double INTAKE_JIGGLE_DISTANCE_INCHES = 3.0;
     private static final int INTAKE_JIGGLE_CYCLES = 3;
     private static final double INTAKE_JIGGLE_POWER = 0.35;
@@ -172,6 +177,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private CRServo windmill;
     private CRServo leftIntakeServo;
     private CRServo rightIntakeServo;
+    private ServoController gobildaLightServos;
     private Limelight3A limelight;
     private AprilTagProcessor aprilTags;
     private VisionPortal webcamPortal;
@@ -221,6 +227,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         windmill = hardwareMap.get(CRServo.class, "windmill_servo");
         leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
         rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
+        gobildaLightServos = hardwareMap.tryGet(ServoController.class, GOBILDA_LIGHT_HUB);
         // Limelight is optional; autonomous continues with odometry and the USB
         // webcam when the Limelight is disconnected or absent from the config.
         limelight = hardwareMap.tryGet(Limelight3A.class, "limelight");
@@ -315,6 +322,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         HEADING_TOLERANCE_RADIANS,
                         true,
                         RED_INTAKE_POSITION_TIMEOUT_SECONDS)) return;
+                lowerArmForIntake();
                 if (!driveForwardTimedWithIntake(
                         RED_INTAKE_FINAL_FORWARD_SECONDS)) return;
                 if (!runIntakeJiggle()) return;
@@ -943,6 +951,18 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         intakeMotor.setPower(1.0);
         leftIntakeServo.setPower(LEFT_INTAKE_SERVO_POWER);
         rightIntakeServo.setPower(RIGHT_INTAKE_SERVO_POWER);
+    }
+
+    private void lowerArmForIntake() {
+        if (gobildaLightServos == null) {
+            RobotLog.ww(TAG, "ARM_LOWER_SKIPPED id=%s servo controller missing", runId);
+            telemetry.addLine("Arm unavailable; continuing intake sequence.");
+            telemetry.update();
+            return;
+        }
+        gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_DOWN_POSITION);
+        RobotLog.ii(TAG, "ARM_LOWERED id=%s position=%.2f", runId, ARM_DOWN_POSITION);
+        sleep(ARM_LOWER_SETTLE_MS);
     }
 
     private boolean alignToPollenColumn() {
