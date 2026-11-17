@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Blinker;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /*
  * StarterBot TeleOp v6: same controls as v5, plus an AprilTag alignment light.
  *
- * The launcher runs at 51.4998% of the motor's full speed (v5 used 350 ticks/s).
+ * The launcher runs at 47.75% of the motor's full speed (v5 used 350 ticks/s).
  * Holding gamepad 2 A (Cross) shoots in TURBO at 61.79976% instead. Each time turbo
  * starts, the Driver Station says "Turbo" and gamepad 2 rumbles (the Control
  * Hub has no speaker of its own).
@@ -54,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 public class BioBuzzStarterbotTeleopV6 extends OpMode {
     // Launcher runs at this fraction of the motor's full free speed.
     // v5 used a fixed 350 ticks/s, which is only ~12% of a goBILDA 5202.
-    public static final double LAUNCHER_SPEED_FRACTION = 0.514998;
+    public static final double LAUNCHER_SPEED_FRACTION = 0.4775;
     // Turbo (gamepad 2 A held) runs the launcher at this fraction instead.
     public static final double LAUNCHER_TURBO_SPEED_FRACTION = 0.6179976;
     private static final int TURBO_RUMBLE_MS = 300;
@@ -74,16 +75,14 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     public static final double WINDMILL_FEED_READY_FRACTION_OF_TARGET = 0.97;
     public static final double WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET = 0.92;
     // Give each ball time to settle into a windmill pocket before advancing.
-    private static final double WINDMILL_CONTINUOUS_POWER = -0.08;
+    private static final double WINDMILL_CONTINUOUS_POWER = -0.25;
     // goBILDA RGB Indicator Light (same positions as Light Test / Shooter Test).
     private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
     private static final int GOBILDA_LIGHT_PORT = 0;
-    private static final int ARM_SERVO_PORT = 1;
-    // Y returns the arm to its starting position; X moves it through the servo's
-    // full 180-degree range to the down position.
-    private static final double ARM_START_POSITION = 0.0;
-    private static final double ARM_DOWN_POSITION = 1.0;
-    private static final double ARM_CALIBRATION_STEP = 0.01;
+    // Y returns the arm to its starting position; X moves it to the down position.
+    private static final double ARM_START_POSITION = 0.5;
+    private static final double ARM_DOWN_POSITION = 0.0;
+    private static final double ARM_CALIBRATION_STEP = 0.1;
     private static final double GOBILDA_OFF = 0.0;
     private static final double GOBILDA_RED = 0.279;
     private static final double GOBILDA_GREEN = 0.500;
@@ -104,12 +103,11 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private DcMotor intake;
     private DcMotorEx launcher;
     private CRServo windmillServo;
-    private CRServo leftIntakeServo;
-    private CRServo rightIntakeServo;
     private AprilTagProcessor aprilTags;
     private VisionPortal webcamPortal;
     private List<LynxModule> hubs;
     private ServoController gobildaLightServos;
+    private Servo flowerArm;
     protected double launcherMaxVelocity;
     protected double launcherNormalVelocity;
     protected double launcherTurboVelocity;
@@ -123,7 +121,6 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private double leftBackPower;
     private double rightBackPower;
     private double intakePower;
-    private double intakeServoPower;
     private double windmillPower;
     private boolean windmillFeedArmed;
     private double armPosition = Double.NaN;
@@ -144,8 +141,6 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         intake = hardwareMap.tryGet(DcMotor.class, "intake_motor");
         launcher = hardwareMap.tryGet(DcMotorEx.class, "shooter_motor");
         windmillServo = hardwareMap.tryGet(CRServo.class, "windmill_servo");
-        leftIntakeServo = hardwareMap.tryGet(CRServo.class, "left_intake_servo");
-        rightIntakeServo = hardwareMap.tryGet(CRServo.class, "right_intake_servo");
         WebcamName webcam = USB_WEBCAM_ENABLED
                 ? hardwareMap.tryGet(WebcamName.class, "Webcam 1") : null;
         if (USB_WEBCAM_ENABLED && webcam != null) {
@@ -166,6 +161,13 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         }
         hubs = hardwareMap.getAll(LynxModule.class);
         gobildaLightServos = hardwareMap.tryGet(ServoController.class, GOBILDA_LIGHT_HUB);
+        flowerArm = hardwareMap.tryGet(Servo.class, "flower_arm");
+        if (flowerArm != null) {
+            flowerArm.setDirection(Servo.Direction.REVERSE);
+            armPosition = flowerArm.getPosition();
+        } else {
+            telemetry.addLine("Note: no 'flower_arm'; flower arm disabled.");
+        }
         if (gobildaLightServos == null) {
             telemetry.addLine("Note: no '" + GOBILDA_LIGHT_HUB + "' servo controller; goBILDA light disabled.");
         }
@@ -180,6 +182,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         }
         if (intake != null) {
             intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            intake.setPower(0.0);
         } else {
             telemetry.addLine("Note: no 'intake_motor'; intake motor disabled.");
         }
@@ -199,20 +203,25 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         launcherTargetVelocity = launcherNormalVelocity;
         RobotLog.ii(TAG, "init max=%.0f normal=%.0f turbo=%.0f ticks/s", launcherMaxVelocity,
                 launcherNormalVelocity, launcherTurboVelocity);
-        if (leftIntakeServo != null) {
-            leftIntakeServo.setPower(0.0);
-            leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
-        }
-        if (rightIntakeServo != null) {
-            rightIntakeServo.setPower(0.0);
-            rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
-        }
         if (windmillServo != null) {
             windmillServo.setPower(0.0);
             windmillServo.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         telemetry.addData("Status", "Initialized");
+        telemetry.addData("Flower arm commanded position", flowerArm == null
+                ? "unavailable" : "%.2f", armPosition);
+        telemetry.update();
+    }
+
+    @Override
+    public void init_loop() {
+        updateArm();
+        telemetry.addData("Status", "Initialized - waiting for Start");
+        telemetry.addData("Flower arm commanded position", flowerArm == null
+                ? "unavailable" : "%.2f", armPosition);
+        telemetry.addLine("Use gp2 D-pad left/right to calibrate; manual movement has no feedback.");
+        telemetry.update();
     }
 
     @Override
@@ -224,13 +233,10 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
         if (gamepad2.right_trigger > 0) {
             intakePower = gamepad2.right_trigger;
-            intakeServoPower = -gamepad2.right_trigger;
         } else if (gamepad2.left_trigger > 0) {
             intakePower = -gamepad2.left_trigger;
-            intakeServoPower = intakePower;
         } else {
             intakePower = 0.0;
-            intakeServoPower = 0.0;
         }
 
         updateTurbo();
@@ -255,7 +261,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                     launcher == null ? 0.0 : launcher.getPower());
         }
 
-        setIntakePower(intakePower, intakeServoPower);
+        setIntakePower(intakePower);
 
         if (shooting) {
             windmillPower = windmillFeedArmed ? WINDMILL_CONTINUOUS_POWER : 0.0;
@@ -282,10 +288,10 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                 : windmillFeedArmed ? "FEEDING"
                 : String.format("WAITING (need %.0f, pause below %.0f)",
                         feedReadyVelocity, feedPauseVelocity));
-        telemetry.addData("Intake motor / servos / windmill", "%.2f / %.2f / %.2f", intakePower, intakeServoPower, windmillPower);
-        telemetry.addData("Arm", Double.isNaN(armPosition)
-                ? "not commanded (gp2 D-pad left/right calibrates)"
-                : String.format("%.2f (D-pad left/right calibrates; X=down, Y=start)",
+        telemetry.addData("Intake motor / windmill", "%.2f / %.2f", intakePower, windmillPower);
+        telemetry.addData("Flower arm position", flowerArm == null
+                ? "unavailable"
+                : String.format("%.2f (gp2 D-pad left/right; X=down, Y=up)",
                         armPosition));
         boolean targetAligned = showAprilTags();
         showLight(targetAligned ? Light.GREEN : Light.OFF);
@@ -395,7 +401,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     }
 
     private void updateArm() {
-        if (gobildaLightServos == null) return;
+        if (flowerArm == null) return;
 
         boolean dpadLeftPressed = gamepad2.dpad_left && !lastArmDpadLeft;
         boolean dpadRightPressed = gamepad2.dpad_right && !lastArmDpadRight;
@@ -404,22 +410,22 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
         if (dpadLeftPressed != dpadRightPressed) {
             if (Double.isNaN(armPosition)) {
-                armPosition = gobildaLightServos.getServoPosition(ARM_SERVO_PORT);
+                armPosition = flowerArm.getPosition();
             }
             armPosition = Range.clip(armPosition
                     + (dpadRightPressed ? ARM_CALIBRATION_STEP : -ARM_CALIBRATION_STEP),
                     0.0, 1.0);
-            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+            flowerArm.setPosition(armPosition);
             return;
         }
 
         // Ignore contradictory input so pressing both buttons cannot make the arm jump.
         if (gamepad2.x && !gamepad2.y) {
             armPosition = ARM_DOWN_POSITION;
-            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+            flowerArm.setPosition(armPosition);
         } else if (gamepad2.y && !gamepad2.x) {
             armPosition = ARM_START_POSITION;
-            gobildaLightServos.setServoPosition(ARM_SERVO_PORT, armPosition);
+            flowerArm.setPosition(armPosition);
         }
     }
 
@@ -496,10 +502,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         return Math.copySign((magnitude - DRIVE_DEADZONE) / (1.0 - DRIVE_DEADZONE), input);
     }
 
-    private void setIntakePower(double motorPower, double servoPower) {
+    private void setIntakePower(double motorPower) {
         if (intake != null) intake.setPower(motorPower);
-        if (leftIntakeServo != null) leftIntakeServo.setPower(servoPower);
-        if (rightIntakeServo != null) rightIntakeServo.setPower(servoPower);
     }
 
     // Turbo while A is held. The sound and rumble fire once per press (rising

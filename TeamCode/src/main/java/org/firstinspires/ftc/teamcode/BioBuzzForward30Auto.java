@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -64,11 +64,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_APPROACH_TRANSLATION_SCALE_WHILE_TURNING = 0.55;
     private static final double SECOND_APPROACH_TURN_KP = 1.35;
     private static final double SECOND_APPROACH_MAX_TURN_POWER = 0.90;
-    private static final double LEFT_TICKS_PER_INCH = 509.66;
-    private static final double RIGHT_TICKS_PER_INCH = 507.60;
-    private static final double CENTER_TICKS_PER_INCH = 507.92;
-    private static final double POD_SPACING_INCHES = 12.263;
-    private static final double CENTER_POD_X_INCHES = -6.718;
+    private static final double LEFT_TICKS_PER_INCH = 503.47;
+    private static final double RIGHT_TICKS_PER_INCH = 504.53;
+    private static final double CENTER_TICKS_PER_INCH = 510.30;
+    private static final double POD_SPACING_INCHES = 12.10;
+    private static final double CENTER_POD_X_INCHES = -6.56;
 
     private static final double TRANSLATION_KP = 0.075;
     private static final double HEADING_KP = 0.90;
@@ -98,25 +98,24 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
     private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
     private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -6.19;
-    private static final double RED_INTAKE_Y_INCHES = -48.92;
+    private static final double RED_INTAKE_X_INCHES = -5.89;
+    private static final double RED_INTAKE_Y_INCHES = -47.04;
     private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
     private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
-    private static final String GOBILDA_LIGHT_HUB = "Expansion Hub 2";
-    private static final int ARM_SERVO_PORT = 1;
-    private static final double ARM_START_POSITION = 0.0;
-    private static final double ARM_DOWN_POSITION = 1.0;
+    private static final double ARM_DOWN_POSITION = 0.0;
+    private static final double ARM_UP_POSITION = 0.5;
     private static final long ARM_LOWER_SETTLE_MS = 250;
     private static final long ARM_RAISE_SETTLE_MS = 1000;
     private static final double INTAKE_NUDGE_DISTANCE_INCHES = 1.0;
     private static final double INTAKE_NUDGE_POWER = 0.30;
     private static final double INTAKE_NUDGE_TIMEOUT_SECONDS = 1.0;
-    // Shifted one additional inch robot-forward and three inches robot-right,
-    // treating the intake side as robot-front at the 195-degree heading.
-    private static final double SECOND_SHOOTING_X_INCHES = -118.26;
-    private static final double SECOND_SHOOTING_Y_INCHES = -10.49;
-    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -178.1;
-    private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 2.0;
+    private static final double SECOND_INTAKE_X_INCHES = -121.41;
+    private static final double SECOND_INTAKE_Y_INCHES = -13.41;
+    private static final double SECOND_INTAKE_HEADING_DEGREES = -180.0;
+    private static final double SECOND_SHOOTING_X_INCHES = -120.80;
+    private static final double SECOND_SHOOTING_Y_INCHES = -0.90;
+    private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -180.0;
+    private static final double SECOND_SHOOTING_POSE_TIMEOUT_SECONDS = 4.0;
     private static final double SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS = 2.0;
     // Fresh high-speed curve from the intake area; these are look-ahead points,
     // not stops, and do not replay the hand-pushed recorded route.
@@ -126,11 +125,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double FAST_SECOND_PATH_WAYPOINT_2_X = -94.83;
     private static final double FAST_SECOND_PATH_WAYPOINT_2_Y = -18.08;
     private static final double FAST_SECOND_PATH_WAYPOINT_2_HEADING = 130.5;
-    // The left CR servo is reversed during initialization, so equal command
-    // powers make the two intake wheels counter-rotate: left wheel rightward,
-    // right wheel leftward, pulling game pieces toward the center.
-    private static final double LEFT_INTAKE_SERVO_POWER = -1.0;
-    private static final double RIGHT_INTAKE_SERVO_POWER = -1.0;
     private static final double AFTER_SHOOTING_HEADING_DEGREES = -86.4;
     private static final double BACK_AFTER_SHOOTING_INCHES = 6.0;
     // Restored original left-side collection approach after the first shot.
@@ -153,7 +147,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_FINAL_Y_INCHES = 51.95;
     private static final double SECOND_PREWALL_Y_INCHES = 40.0;
     private static final double SECOND_FINAL_APPROACH_TIMEOUT_SECONDS = 5.0;
-    private static final double SECOND_SHOOTING_HEADING_DEGREES = 94.0;
+    private static final double SECOND_SHOOTING_HEADING_DEGREES = -180.0;
     private static final double SECOND_POSITION_INTAKE_LEAD_SECONDS = 1.0;
     private static final double SECOND_POSITION_CONTACT_FORWARD_POWER = 0.16;
     private static final double SECOND_POSITION_HOLD_FORWARD_POWER = 0.06;
@@ -163,8 +157,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_POSITION_MAX_HEADING_HOLD_POWER = 0.35;
     private static final double SECOND_SHOOTING_SECONDS = 6.0;
     private static final double WINDMILL_FEED_POWER = -0.20;
-    private static final double FINAL_PARK_X_INCHES = -109.74;
-    private static final double FINAL_PARK_Y_INCHES = -42.82;
+    private static final double FINAL_PARK_X_INCHES = -109.93;
+    private static final double FINAL_PARK_Y_INCHES = -47.73;
+    private static final double FINAL_PARK_HEADING_DEGREES = 90.0;
     private static final double SHOOTER_P = 40.0;
     private static final double SHOOTER_F = 12.5;
 
@@ -178,9 +173,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private DcMotor centerPod;
     private DcMotorEx shooter;
     private CRServo windmill;
-    private CRServo leftIntakeServo;
-    private CRServo rightIntakeServo;
-    private ServoController gobildaLightServos;
+    private Servo flowerArm;
     private Limelight3A limelight;
     private AprilTagProcessor aprilTags;
     private VisionPortal webcamPortal;
@@ -228,9 +221,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         activeShooterReadyVelocity = shooterReadyVelocity;
         shooterTargetVelocity = shooterVelocity;
         windmill = hardwareMap.get(CRServo.class, "windmill_servo");
-        leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
-        rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
-        gobildaLightServos = hardwareMap.tryGet(ServoController.class, GOBILDA_LIGHT_HUB);
+        flowerArm = hardwareMap.get(Servo.class, "flower_arm");
+        flowerArm.setDirection(Servo.Direction.REVERSE);
         // Limelight is optional; autonomous continues with odometry and the USB
         // webcam when the Limelight is disconnected or absent from the config.
         limelight = hardwareMap.tryGet(Limelight3A.class, "limelight");
@@ -251,11 +243,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         shooter.setVelocity(0);
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
         windmill.setPower(0);
-        // Both intake servos intentionally run opposite their previous directions.
-        leftIntakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightIntakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftIntakeServo.setPower(0);
-        rightIntakeServo.setPower(0);
         if (limelight != null) {
             limelight.pipelineSwitch(LIMELIGHT_PIPELINE);
             limelight.start();
@@ -329,27 +316,56 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!driveIntakeNudge(INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 if (!driveIntakeNudge(-INTAKE_NUDGE_DISTANCE_INCHES)) return;
                 shootingState = "RED INTAKE COLLECTION COMPLETE";
-                if (captureNextPositionAfterIntake()
-                        && !recordSecondShootingPathAfterIntake()) return;
+                // Keep collecting from intake position 1 through the approach
+                // to intake position 2.
                 runIntakeDuringPath = false;
-                // Keep the shooter spinning throughout collection, then switch
-                // directly to the second-shot speed without stopping it.
                 startShooter(secondShooterVelocity);
-                if (!followFastSecondShootingPath()) return;
-                windmill.setPower(WINDMILL_FEED_POWER);
-                shootingState = "SECOND POSITION - INTAKE + WINDMILL RUNNING";
-                if (!waitForSecondShotTarget()) {
-                    if (!opModeIsActive()) return;
-                    shootingState = "TAG TIMEOUT - SHOOTING FROM RECORDED POSITION";
-                    RobotLog.ww(TAG,
-                            "SECOND_SHOT_TAG_TIMEOUT id=%s target=%s; shooting anyway",
-                            runId, secondShotTargetName());
-                }
+
+                // Clear the first intake mechanism, then use a dedicated turn.
+                // Do not ask the pose controller to hold X/Y while rotating;
+                // odometry drift made those corrections fight the turn.
+                if (!driveRobotRelative(-5.0, 6.0, 0.0,
+                        "Fast clearance: back 5 and left 6 inches",
+                        true, 2.0)) return;
+                if (!turnInPlaceToHeading(-180.0,
+                        "Fast clearance: turn CCW to -180", 3.0)) return;
+
+                updatePose();
+                double distanceToSecondIntake = Math.hypot(
+                        SECOND_INTAKE_X_INCHES - x,
+                        SECOND_INTAKE_Y_INCHES - y);
+                double straightDistance = distanceToSecondIntake * (2.0 / 3.0);
+                double straightTargetX = x - straightDistance;
+                double straightTargetY = y;
+                if (!followLineSegment(straightTargetX, straightTargetY,
+                        SECOND_INTAKE_HEADING_DEGREES,
+                        "Segment: straight first 2/3 to second intake",
+                        8.0)) return;
+
+                if (!followLineSegment(SECOND_INTAKE_X_INCHES,
+                        SECOND_INTAKE_Y_INCHES,
+                        SECOND_INTAKE_HEADING_DEGREES,
+                        "Segment: diagonal to second intake position", 6.0)) return;
+
+                // Shoot immediately for four seconds at intake position 2;
+                // intake remains on continuously through parking.
                 if (!waitForShooterSpinup()) return;
-                // Same four-ball timed feed routine used at the starting pose.
+                runShooterAndWindmill(true, 4.0);
+
+                // Start collecting, then keep intake, shooter, and windmill
+                // running throughout the move to shooting position 2.
+                startIntake();
+                shooter.setVelocity(shooterTargetVelocity);
+                windmill.setPower(WINDMILL_FEED_POWER);
+                if (!followLineSegment(SECOND_SHOOTING_X_INCHES,
+                        SECOND_SHOOTING_Y_INCHES,
+                        SECOND_SHOOTING_CAPTURED_HEADING_DEGREES,
+                        "Segment: second intake to second shooting",
+                        7.0)) return;
+                if (!waitForShooterSpinup()) return;
                 runShooterAndWindmill(true);
+
                 shooter.setVelocity(0);
-                stopIntake();
                 raiseArmForParking();
                 shootingState = "DRIVING TO PARK";
                 if (!parkTwoFeetRobotLeft()) return;
@@ -385,6 +401,13 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 FAST_SECOND_PATH_WAYPOINT_2_HEADING,
                 "Fast shooting curve 2/2",
                 18.0, Math.toRadians(35.0), false)) return false;
+        if (!driveToPose(SECOND_INTAKE_X_INCHES,
+                SECOND_INTAKE_Y_INCHES,
+                SECOND_INTAKE_HEADING_DEGREES,
+                "Second intake position",
+                POSITION_TOLERANCE_INCHES, Math.toRadians(3.0), true,
+                SECOND_SHOOTING_POSE_TIMEOUT_SECONDS,
+                SECOND_SHOOTING_HEADING_TIMEOUT_SECONDS)) return false;
         return driveToPose(SECOND_SHOOTING_X_INCHES,
                 SECOND_SHOOTING_Y_INCHES,
                 SECOND_SHOOTING_CAPTURED_HEADING_DEGREES,
@@ -442,14 +465,14 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     private boolean parkTwoFeetRobotLeft() {
         updatePose();
-        double parkHeadingDegrees = Math.toDegrees(heading);
         RobotLog.ii(TAG,
                 "RELATIVE_PARK_LEFT id=%s start=(%.2f,%.2f,%.1f) target=(%.2f,%.2f,%.1f)",
-                runId, x, y, parkHeadingDegrees,
-                FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES, parkHeadingDegrees);
-        return driveToPose(FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
-                parkHeadingDegrees, "Park at preserved field position",
-                2.0, Math.toRadians(5.0), true);
+                runId, x, y, Math.toDegrees(heading),
+                FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
+                FINAL_PARK_HEADING_DEGREES);
+        return followLineSegment(FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
+                FINAL_PARK_HEADING_DEGREES,
+                "Segment: park at recorded field position", 7.0);
     }
 
     private void startShooter(double targetVelocity) {
@@ -495,13 +518,18 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     }
 
     private void runShooterAndWindmill(boolean forceWindmillFeed) {
+        runShooterAndWindmill(forceWindmillFeed, SHOOTING_SECONDS);
+    }
+
+    private void runShooterAndWindmill(boolean forceWindmillFeed,
+                                       double shootingSeconds) {
         shootingState = "SHOOTER + WINDMILL RUNNING";
         ElapsedTime shootingTimer = new ElapsedTime();
         RobotLog.ii(TAG, forceWindmillFeed
                         ? "Windmill forced to full feed for second four-ball shot"
                         : "Windmill feeds at full power only above %.0f ticks/s",
                 activeShooterReadyVelocity);
-        while (opModeIsActive() && shootingTimer.seconds() < SHOOTING_SECONDS) {
+        while (opModeIsActive() && shootingTimer.seconds() < shootingSeconds) {
             // Hold one velocity for every ball; do not reduce the target late
             // in the cycle while the windmill is still feeding.
             shooter.setVelocity(shooterTargetVelocity);
@@ -512,7 +540,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             windmill.setPower(feeding ? WINDMILL_FEED_POWER : 0.0);
             telemetry.addData("Step", "Continuous shooting");
             telemetry.addData("Shooting time", "%.1f / %.1f sec",
-                    shootingTimer.seconds(), SHOOTING_SECONDS);
+                    shootingTimer.seconds(), shootingSeconds);
             telemetry.addData("Windmill", feeding
                     ? "FULL SPEED" : "WAITING FOR SHOOTER SPEED");
             addShootingTelemetry();
@@ -538,8 +566,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 runId, x, y, Math.toDegrees(heading), pressCenterTarget,
                 Math.toDegrees(pressHeadingTarget));
         intakeMotor.setPower(1.0);
-        leftIntakeServo.setPower(LEFT_INTAKE_SERVO_POWER);
-        rightIntakeServo.setPower(RIGHT_INTAKE_SERVO_POWER);
 
         ElapsedTime intakeLeadTimer = new ElapsedTime();
         while (opModeIsActive()
@@ -796,8 +822,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         double distanceTraveled = 0.0;
         boolean targetReached = false;
         intakeMotor.setPower(1.0);
-        leftIntakeServo.setPower(LEFT_INTAKE_SERVO_POWER);
-        rightIntakeServo.setPower(RIGHT_INTAKE_SERVO_POWER);
 
         while (opModeIsActive()
                 && timer.seconds() < INTAKE_FORWARD_TIMEOUT_SECONDS) {
@@ -868,30 +892,25 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     private void stopIntake() {
         intakeMotor.setPower(0);
-        leftIntakeServo.setPower(0);
-        rightIntakeServo.setPower(0);
     }
 
     private void startIntake() {
         intakeMotor.setPower(1.0);
-        leftIntakeServo.setPower(LEFT_INTAKE_SERVO_POWER);
-        rightIntakeServo.setPower(RIGHT_INTAKE_SERVO_POWER);
     }
 
     private void beginLoweringArmForIntake() {
-        if (gobildaLightServos == null) {
-            RobotLog.ww(TAG, "ARM_LOWER_SKIPPED id=%s servo controller missing", runId);
-            telemetry.addLine("Arm unavailable; continuing intake sequence.");
-            telemetry.update();
-            return;
-        }
-        gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_DOWN_POSITION);
+        flowerArm.setPosition(ARM_DOWN_POSITION);
         RobotLog.ii(TAG, "ARM_LOWERED id=%s position=%.2f", runId, ARM_DOWN_POSITION);
     }
 
     private void finishLoweringArmForIntake() {
-        if (gobildaLightServos == null) return;
         sleep(ARM_LOWER_SETTLE_MS);
+    }
+
+    private void raiseArmForParking() {
+        flowerArm.setPosition(ARM_UP_POSITION);
+        RobotLog.ii(TAG, "ARM_RAISED id=%s position=%.2f", runId, ARM_UP_POSITION);
+        sleep(ARM_RAISE_SETTLE_MS);
     }
 
     private boolean driveIntakeNudge(double distanceInches) {
@@ -976,16 +995,6 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             idle();
         }
         return false;
-    }
-
-    private void raiseArmForParking() {
-        if (gobildaLightServos == null) {
-            RobotLog.ww(TAG, "ARM_RAISE_SKIPPED id=%s servo controller missing", runId);
-            return;
-        }
-        gobildaLightServos.setServoPosition(ARM_SERVO_PORT, ARM_START_POSITION);
-        RobotLog.ii(TAG, "ARM_RAISED id=%s position=%.2f", runId, ARM_START_POSITION);
-        sleep(ARM_RAISE_SETTLE_MS);
     }
 
     private boolean alignToPollenColumn() {
@@ -1105,6 +1114,278 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 timeoutSeconds, Double.POSITIVE_INFINITY);
     }
 
+    private boolean driveRobotRelative(double forwardInches, double leftInches,
+                                       double headingDegrees, String step,
+                                       boolean stopAtTarget, double timeoutSeconds) {
+        updatePose();
+        double cos = Math.cos(heading);
+        double sin = Math.sin(heading);
+        double targetX = x + forwardInches * cos - leftInches * sin;
+        double targetY = y + forwardInches * sin + leftInches * cos;
+        return driveToPose(targetX, targetY, headingDegrees, step,
+                0.75, Math.toRadians(4.0), stopAtTarget, timeoutSeconds);
+    }
+
+    private boolean turnInPlaceToHeading(double targetHeadingDegrees,
+                                         String step, double timeoutSeconds) {
+        final double tolerance = Math.toRadians(3.0);
+        final double turnKp = 1.25;
+        final double maxPower = 0.90;
+        final double minPower = 0.22;
+        ElapsedTime timer = new ElapsedTime();
+        updatePose();
+        double previousHeading = heading;
+        double counterClockwiseRotation = 0.0;
+        final double requestedRotation = Math.PI;
+
+        while (opModeIsActive() && timer.seconds() < timeoutSeconds) {
+            updatePose();
+            // Accumulate the measured CCW rotation instead of calculating the
+            // shortest path to -180. At exactly 180 degrees, tiny noise around
+            // zero otherwise flips the shortest path between CW and CCW.
+            // Direction is fixed by the motor command below. Accumulate the
+            // magnitude so an encoder-sign mismatch cannot prevent stopping.
+            counterClockwiseRotation += Math.abs(
+                    normalizeRadians(heading - previousHeading));
+            previousHeading = heading;
+            double remaining = requestedRotation - counterClockwiseRotation;
+            if (remaining <= tolerance) {
+                stopDrive();
+                RobotLog.ii(TAG, "TURN_REACHED id=%s step=%s elapsed=%.2f heading=%.1f",
+                        runId, step, timer.seconds(), Math.toDegrees(heading));
+                return true;
+            }
+
+            // Keep one fixed physical direction for the entire half-turn.
+            double turn = Range.clip(remaining * turnKp, minPower, maxPower);
+            setMecanum(0.0, 0.0, -turn);
+            telemetry.addData("Step", step);
+            telemetry.addData("CCW rotation", "%.1f / 180.0 deg",
+                    Math.toDegrees(counterClockwiseRotation));
+            telemetry.addData("Turn power", "%+.2f", -turn);
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        RobotLog.ww(TAG, "TURN_TIMEOUT id=%s step=%s heading=%.1f target=%.1f",
+                runId, step, Math.toDegrees(heading), targetHeadingDegrees);
+        return false;
+    }
+
+    private boolean driveStraightForward(double distanceInches,
+                                         String step, double timeoutSeconds) {
+        updatePose();
+        final double targetHeading = heading;
+        final double forwardPower = 0.75;
+        final double headingKp = 1.20;
+        final double maxHeadingCorrection = 0.45;
+        int startLeft = readLeft();
+        int startRight = readRight();
+        ElapsedTime timer = new ElapsedTime();
+
+        while (opModeIsActive() && timer.seconds() < timeoutSeconds) {
+            updatePose();
+            double leftDistance = Math.abs(readLeft() - startLeft)
+                    / LEFT_TICKS_PER_INCH;
+            double rightDistance = Math.abs(readRight() - startRight)
+                    / RIGHT_TICKS_PER_INCH;
+            double traveled = (leftDistance + rightDistance) / 2.0;
+            if (traveled >= distanceInches) {
+                stopDrive();
+                RobotLog.ii(TAG,
+                        "STRAIGHT_REACHED id=%s step=%s elapsed=%.2f distance=%.1f pose=(%.2f,%.2f,%.1f)",
+                        runId, step, timer.seconds(), traveled,
+                        x, y, Math.toDegrees(heading));
+                return true;
+            }
+
+            // Isolate the feedback loops: hold only the heading here. X/Y and
+            // lateral corrections stay disabled so they cannot fight forward
+            // travel. Reduced forward power preserves turning authority.
+            double headingError = normalizeRadians(targetHeading - heading);
+            double headingCorrection = Range.clip(
+                    headingError * headingKp,
+                    -maxHeadingCorrection, maxHeadingCorrection);
+            // Negative mixer turn produces positive/CCW odometry heading.
+            setMecanum(forwardPower, 0.0, -headingCorrection);
+            telemetry.addData("Step", step);
+            telemetry.addData("Straight distance", "%.1f / %.1f in",
+                    traveled, distanceInches);
+            telemetry.addData("Heading hold", "%+.1f / %+.1f deg",
+                    Math.toDegrees(heading), Math.toDegrees(targetHeading));
+            telemetry.addData("Heading correction", "%+.2f", -headingCorrection);
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        RobotLog.ww(TAG, "STRAIGHT_TIMEOUT id=%s step=%s pose=(%.2f,%.2f,%.1f)",
+                runId, step, x, y, Math.toDegrees(heading));
+        return false;
+    }
+
+    private boolean followLineSegment(double targetX, double targetY,
+                                      double targetHeadingDegrees,
+                                      String step, double timeoutSeconds) {
+        updatePose();
+        final double startX = x;
+        final double startY = y;
+        final double segmentX = targetX - startX;
+        final double segmentY = targetY - startY;
+        final double segmentLength = Math.hypot(segmentX, segmentY);
+        if (segmentLength < 0.01) return true;
+
+        final double unitX = segmentX / segmentLength;
+        final double unitY = segmentY / segmentLength;
+        final double targetHeading = Math.toRadians(targetHeadingDegrees);
+        final double lookaheadInches = 10.0;
+        final double maxTranslation = 0.85;
+        final double minTranslation = 0.20;
+        final double rampDistance = 14.0;
+        final double headingKp = 1.15;
+        final double maxTurn = 0.50;
+        ElapsedTime timer = new ElapsedTime();
+
+        while (opModeIsActive() && timer.seconds() < timeoutSeconds) {
+            updatePose();
+            double fromStartX = x - startX;
+            double fromStartY = y - startY;
+            double progress = fromStartX * unitX + fromStartY * unitY;
+            double crossTrack = unitX * fromStartY - unitY * fromStartX;
+            double remaining = Math.hypot(targetX - x, targetY - y);
+            double headingError = normalizeRadians(targetHeading - heading);
+
+            if (remaining <= 2.0 && Math.abs(headingError) <= Math.toRadians(4.0)) {
+                stopDrive();
+                RobotLog.ii(TAG,
+                        "SEGMENT_REACHED id=%s step=%s elapsed=%.2f remaining=%.2f cross=%.2f pose=(%.2f,%.2f,%.1f)",
+                        runId, step, timer.seconds(), remaining, crossTrack,
+                        x, y, Math.toDegrees(heading));
+                return true;
+            }
+
+            double lookaheadProgress = Range.clip(
+                    progress + lookaheadInches, 0.0, segmentLength);
+            double aimX = startX + unitX * lookaheadProgress;
+            double aimY = startY + unitY * lookaheadProgress;
+            if (segmentLength - progress <= lookaheadInches) {
+                aimX = targetX;
+                aimY = targetY;
+            }
+            double aimErrorX = aimX - x;
+            double aimErrorY = aimY - y;
+            double aimLength = Math.max(0.001, Math.hypot(aimErrorX, aimErrorY));
+
+            double rampUp = Range.clip((progress + 3.0) / rampDistance, 0.35, 1.0);
+            double rampDown = Range.clip(remaining / rampDistance, 0.0, 1.0);
+            double translation = Range.clip(maxTranslation * Math.min(rampUp, rampDown),
+                    minTranslation, maxTranslation);
+            // Prioritize completing large heading changes before translating.
+            double headingScale = Range.clip(
+                    1.0 - Math.abs(headingError) / Math.toRadians(100.0),
+                    0.25, 1.0);
+            translation *= headingScale;
+
+            double fieldForwardX = translation * aimErrorX / aimLength;
+            double fieldForwardY = translation * aimErrorY / aimLength;
+            double cos = Math.cos(heading);
+            double sin = Math.sin(heading);
+            double robotForward = fieldForwardX * cos + fieldForwardY * sin;
+            double robotLeft = -fieldForwardX * sin + fieldForwardY * cos;
+            double headingCorrection = Range.clip(
+                    headingError * headingKp, -maxTurn, maxTurn);
+            double mixerTurn = -headingCorrection;
+
+            // Reserve wheel range for turn instead of allowing normalization
+            // to weaken heading control at high translation power.
+            double availableForTranslation = Math.max(0.20, 1.0 - Math.abs(mixerTurn));
+            double translationWheelMax = Math.max(
+                    Math.abs(robotForward + robotLeft),
+                    Math.abs(robotForward - robotLeft));
+            if (translationWheelMax > availableForTranslation) {
+                double scale = availableForTranslation / translationWheelMax;
+                robotForward *= scale;
+                robotLeft *= scale;
+            }
+
+            setMecanum(robotForward, -robotLeft, mixerTurn);
+            telemetry.addData("Step", step);
+            telemetry.addData("Segment progress", "%.1f / %.1f in",
+                    progress, segmentLength);
+            telemetry.addData("Cross-track / remaining", "%+.1f / %.1f in",
+                    crossTrack, remaining);
+            telemetry.addData("Heading", "%+.1f / %+.1f deg",
+                    Math.toDegrees(heading), targetHeadingDegrees);
+            telemetry.addData("Command F / L / T", "%+.2f / %+.2f / %+.2f",
+                    robotForward, robotLeft, mixerTurn);
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        RobotLog.ww(TAG,
+                "SEGMENT_TIMEOUT id=%s step=%s pose=(%.2f,%.2f,%.1f) target=(%.2f,%.2f,%.1f)",
+                runId, step, x, y, Math.toDegrees(heading),
+                targetX, targetY, targetHeadingDegrees);
+        return false;
+    }
+
+    private boolean driveFixedVectorToPose(double targetX, double targetY,
+                                           double targetHeadingDegrees,
+                                           String step, double timeoutSeconds) {
+        updatePose();
+        final double startX = x;
+        final double startY = y;
+        final double targetHeading = Math.toRadians(targetHeadingDegrees);
+        final double errorX = targetX - x;
+        final double errorY = targetY - y;
+        final double commandedDistance = Math.hypot(errorX, errorY);
+        final double cos = Math.cos(heading);
+        final double sin = Math.sin(heading);
+        final double robotForward = errorX * cos + errorY * sin;
+        final double robotLeft = -errorX * sin + errorY * cos;
+        final double vectorLength = Math.max(0.001,
+                Math.hypot(robotForward, robotLeft));
+        final double translationPower = 0.80;
+        final double forwardCommand = translationPower * robotForward / vectorLength;
+        final double leftCommand = translationPower * robotLeft / vectorLength;
+        ElapsedTime timer = new ElapsedTime();
+
+        while (opModeIsActive() && timer.seconds() < timeoutSeconds) {
+            updatePose();
+            double remaining = Math.hypot(targetX - x, targetY - y);
+            double traveled = Math.hypot(x - startX, y - startY);
+            if (remaining <= 2.5 || traveled >= commandedDistance) {
+                stopDrive();
+                RobotLog.ii(TAG,
+                        "FIXED_VECTOR_REACHED id=%s step=%s elapsed=%.2f remaining=%.1f pose=(%.2f,%.2f,%.1f)",
+                        runId, step, timer.seconds(), remaining,
+                        x, y, Math.toDegrees(heading));
+                return true;
+            }
+
+            double headingError = normalizeRadians(targetHeading - heading);
+            double headingCorrection = Range.clip(
+                    headingError * 1.20, -0.40, 0.40);
+            // Keep the translation vector fixed. Only heading is corrected.
+            setMecanum(forwardCommand, -leftCommand, -headingCorrection);
+            telemetry.addData("Step", step);
+            telemetry.addData("Remaining", "%.1f in", remaining);
+            telemetry.addData("Fixed drive F / L", "%+.2f / %+.2f",
+                    forwardCommand, leftCommand);
+            telemetry.addData("Heading", "%+.1f / %+.1f deg",
+                    Math.toDegrees(heading), targetHeadingDegrees);
+            telemetry.update();
+            idle();
+        }
+
+        stopDrive();
+        RobotLog.ww(TAG, "FIXED_VECTOR_TIMEOUT id=%s step=%s pose=(%.2f,%.2f,%.1f)",
+                runId, step, x, y, Math.toDegrees(heading));
+        return false;
+    }
+
     private boolean driveToPose(double targetX, double targetY,
                                 double targetHeadingDegrees, String step,
                                 double positionTolerance, double headingTolerance,
@@ -1169,13 +1450,17 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             // fixed 0.75-inch dead zone made a 0.60-inch tolerance impossible.
             double axisTolerance = positionTolerance / Math.sqrt(2.0);
 
-            double forward = minimumPower(
-                    Range.clip(robotForwardError * TRANSLATION_KP,
-                            -MAX_FORWARD_POWER, MAX_FORWARD_POWER),
+            // Scale both translation axes together. Clipping them separately
+            // turns a shallow diagonal into equal full forward/strafe power,
+            // which powers only two wheels and makes the controller hunt.
+            double rawForward = robotForwardError * TRANSLATION_KP;
+            double rawLeft = robotLeftError * TRANSLATION_KP;
+            double translationScale = Math.max(1.0, Math.max(
+                    Math.abs(rawForward) / MAX_FORWARD_POWER,
+                    Math.abs(rawLeft) / MAX_STRAFE_POWER));
+            double forward = minimumPower(rawForward / translationScale,
                     MIN_FORWARD_POWER, robotForwardError);
-            double left = minimumPower(
-                    Range.clip(robotLeftError * TRANSLATION_KP,
-                            -MAX_STRAFE_POWER, MAX_STRAFE_POWER),
+            double left = minimumPower(rawLeft / translationScale,
                     MIN_STRAFE_POWER, robotLeftError);
             double turn = Range.clip(headingError * HEADING_KP,
                     -MAX_TURN_POWER, MAX_TURN_POWER);
