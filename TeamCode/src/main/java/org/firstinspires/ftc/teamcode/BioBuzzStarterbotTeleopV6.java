@@ -81,7 +81,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private static final int GOBILDA_LIGHT_PORT = 0;
     // Y returns the arm to its starting position; X moves it to the down position.
     private static final double ARM_START_POSITION = 0.5;
-    private static final double ARM_DOWN_POSITION = 0.0;
+    private static final double ARM_DOWN_POSITION = 0.05;
     private static final double ARM_CALIBRATION_STEP = 0.1;
     private static final double GOBILDA_OFF = 0.0;
     private static final double GOBILDA_RED = 0.279;
