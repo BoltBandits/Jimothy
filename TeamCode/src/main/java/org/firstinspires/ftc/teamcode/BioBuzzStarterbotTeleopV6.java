@@ -101,10 +101,10 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private DcMotor leftBackDrive;
     private DcMotor rightBackDrive;
     private DcMotor intake;
-    private DcMotorEx launcher;
+    protected DcMotorEx launcher;
     private CRServo windmillServo;
-    private AprilTagProcessor aprilTags;
-    private VisionPortal webcamPortal;
+    protected AprilTagProcessor aprilTags;
+    protected VisionPortal webcamPortal;
     private List<LynxModule> hubs;
     private ServoController gobildaLightServos;
     private Servo flowerArm;
@@ -151,7 +151,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
             aprilTags.setDecimation(1.0f);
             webcamPortal = new VisionPortal.Builder()
                     .setCamera(webcam)
-                    .setCameraResolution(new Size(1280, 720))
+                    .setCameraResolution(webcamResolution())
                     .addProcessor(aprilTags)
                     .build();
         } else if (USB_WEBCAM_ENABLED) {
@@ -240,13 +240,14 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         }
 
         updateTurbo();
+        updateAutomaticShooterTarget();
         launch();
         double launcherVelocity = launcher == null ? 0.0 : launcher.getVelocity();
         double feedReadyVelocity = WINDMILL_FEED_READY_FRACTION_OF_TARGET
                 * launcherTargetVelocity;
         double feedPauseVelocity = WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET
                 * launcherTargetVelocity;
-        boolean shooting = gamepad2.right_bumper || turbo;
+        boolean shooting = (gamepad2.right_bumper || turbo) && allowShootingFeed();
         if (!shooting) {
             windmillFeedArmed = false;
         } else if (windmillFeedArmed && launcherVelocity < feedPauseVelocity) {
@@ -294,7 +295,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                 : String.format("%.2f (gp2 D-pad left/right; X=down, Y=up)",
                         armPosition));
         boolean targetAligned = showAprilTags();
-        showLight(targetAligned ? Light.GREEN : Light.OFF);
+        showLight(targetAligned ? Light.GREEN
+                : showRedWhenNotReady() ? Light.RED : Light.OFF);
         telemetry.addData("Lights", "%s (requires visible upright %s AprilTag)",
                 currentLight, targetAllianceName());
         telemetry.addData("Controls", controlsDescription());
@@ -308,7 +310,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         }
     }
 
-    private boolean showAprilTags() {
+    protected boolean showAprilTags() {
         if (webcamPortal == null || aprilTags == null) {
             telemetry.addData("Webcam", "NOT CONFIGURED");
             return false;
@@ -522,6 +524,30 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         launcherTargetVelocity = turbo ? launcherTurboVelocity : launcherNormalVelocity;
     }
 
+    /** Optional per-loop camera-based adjustment used by specialized TeleOps. */
+    protected void updateAutomaticShooterTarget() {
+    }
+
+    /** Specialized TeleOps may keep the flywheel spinning without feeding. */
+    protected boolean shouldRunLauncher() {
+        return gamepad2.right_bumper || turbo;
+    }
+
+    /** Specialized TeleOps may show red instead of off when targeting is not ready. */
+    protected boolean showRedWhenNotReady() {
+        return false;
+    }
+
+    /** Resolution hook for modes that favor frame rate over long-range detail. */
+    protected Size webcamResolution() {
+        return new Size(1280, 720);
+    }
+
+    /** Specialized TeleOps may prevent feeding until their targeting checks pass. */
+    protected boolean allowShootingFeed() {
+        return true;
+    }
+
     protected double normalShooterFraction() {
         return LAUNCHER_SPEED_FRACTION;
     }
@@ -545,7 +571,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
     private void launch() {
         if (launcher == null) return;
-        if (gamepad2.right_bumper || turbo) {
+        if (shouldRunLauncher()) {
             launcher.setVelocity(launcherTargetVelocity);
         } else if (gamepad2.left_bumper) {
             launcher.setVelocity(-LAUNCHER_EJECT_VELOCITY);
