@@ -19,25 +19,41 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
     // speeds as battery voltage changes.
     private static final double CLOSE_DISTANCE_INCHES = 30.0;
     private static final double MID_DISTANCE_INCHES = 34.0;
+    private static final double LONG_DISTANCE_INCHES = 40.0;
     private static final double FAR_DISTANCE_INCHES = 120.0;
     private static final double CLOSE_SHOOTER_RPM = 29.0;
     private static final double MID_SHOOTER_RPM = 31.5;
+    private static final double LONG_SHOOTER_RPM = 33.0;
     private static final double FAR_SHOOTER_RPM = 34.2;
 
     // Camera mounting offsets measured with the red scoring target physically
     // upright and the robot aimed correctly at about 30 inches.
-    private static final double MIN_READY_BEARING_DEGREES = -9.5;
-    private static final double MAX_READY_BEARING_DEGREES = 3.5;
-    private static final double NEAR_MAX_YAW_ERROR_DEGREES = 32.0;
-    private static final double FAR_MAX_YAW_ERROR_DEGREES = 8.0;
-    private static final int MIN_CLUSTER_VISIBILITY_PERCENT = 50;
+    private static final double MIN_READY_BEARING_DEGREES = -7.0;
+    private static final double MAX_READY_BEARING_DEGREES = 5.5;
+    // Closer than this, the fixed launcher elevation is too flat to clear the
+    // lower rim reliably even when wheel speed and horizontal aim are correct.
+    private static final double MIN_READY_DISTANCE_INCHES = 24.0;
+    private static final double MAX_ANGLED_DISTANCE_ADDITION_INCHES = 3.0;
+    private static final double FULL_DISTANCE_ADDITION_ROLL_DEGREES = 45.0;
+    private static final double NEAR_MAX_YAW_ERROR_DEGREES = 50.0;
+    private static final double FAR_MAX_YAW_ERROR_DEGREES = 20.0;
+    private static final double BEARING_NARROWING_YAW_DEGREES = 45.0;
+    private static final double BEARING_WIDTH_AT_45_DEGREES = 0.40;
+    // At an oblique approach only one of the four scoring tags may be visible.
+    // The cluster identity still guarantees it belongs to the red target.
+    private static final int MIN_CLUSTER_VISIBILITY_PERCENT = 25;
     private static final double READY_SPEED_FRACTION = 0.97;
     private static final double TARGET_MEMORY_SECONDS = 3.0;
+    private static final double GREEN_CONFIRM_SECONDS = 0.12;
+    private static final double RED_CONFIRM_SECONDS = 0.25;
 
     private TargetObservation target = TargetObservation.none();
     private TargetObservation lastValidTarget = TargetObservation.none();
     private long lastValidTargetNanos;
     private boolean lastReadyToShoot;
+    private boolean pendingReadyToShoot;
+    private boolean displayedReadyToShoot;
+    private long pendingReadySinceNanos;
     private boolean lastFeedRequested;
 
     @Override
@@ -60,13 +76,20 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
                         0.0, 1.0);
                 targetRpm = CLOSE_SHOOTER_RPM
                         + ratio * (MID_SHOOTER_RPM - CLOSE_SHOOTER_RPM);
-            } else {
+            } else if (target.rangeInches <= LONG_DISTANCE_INCHES) {
                 double ratio = Range.clip(
                         (target.rangeInches - MID_DISTANCE_INCHES)
-                                / (FAR_DISTANCE_INCHES - MID_DISTANCE_INCHES),
+                                / (LONG_DISTANCE_INCHES - MID_DISTANCE_INCHES),
                         0.0, 1.0);
                 targetRpm = MID_SHOOTER_RPM
-                        + ratio * (FAR_SHOOTER_RPM - MID_SHOOTER_RPM);
+                        + ratio * (LONG_SHOOTER_RPM - MID_SHOOTER_RPM);
+            } else {
+                double ratio = Range.clip(
+                        (target.rangeInches - LONG_DISTANCE_INCHES)
+                                / (FAR_DISTANCE_INCHES - LONG_DISTANCE_INCHES),
+                        0.0, 1.0);
+                targetRpm = LONG_SHOOTER_RPM
+                        + ratio * (FAR_SHOOTER_RPM - LONG_SHOOTER_RPM);
             }
             double ticksPerRevolution = launcher == null
                     ? 1.0 : launcher.getMotorType().getTicksPerRev();
@@ -85,6 +108,16 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
     }
 
     @Override
+    protected double windmillFeedReadyFraction() {
+        return 0.99;
+    }
+
+    @Override
+    protected double windmillFeedPauseFraction() {
+        return 0.97;
+    }
+
+    @Override
     protected boolean showAprilTags() {
         // Refresh after the launcher command so readiness uses the latest pose
         // and measured flywheel velocity.
@@ -96,7 +129,28 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
         double actualRpm = actualVelocity * 60.0 / ticksPerRevolution;
         boolean atSpeed = launcher != null
                 && actualVelocity >= READY_SPEED_FRACTION * launcherTargetVelocity;
-        boolean readyToShoot = target.angleReady && atSpeed;
+        double minimumReadyDistance = MIN_READY_DISTANCE_INCHES;
+        if (target.hasRange) {
+            double rollRatio = Range.clip(
+                    Math.abs(target.rollDegrees) / FULL_DISTANCE_ADDITION_ROLL_DEGREES,
+                    0.0, 1.0);
+            minimumReadyDistance += rollRatio * MAX_ANGLED_DISTANCE_ADDITION_INCHES;
+        }
+        boolean distanceReady = target.hasRange
+                && target.rangeInches >= minimumReadyDistance;
+        boolean instantaneousReady = target.angleReady && distanceReady && atSpeed;
+        long now = System.nanoTime();
+        if (instantaneousReady != pendingReadyToShoot) {
+            pendingReadyToShoot = instantaneousReady;
+            pendingReadySinceNanos = now;
+        }
+        double confirmSeconds = pendingReadyToShoot
+                ? GREEN_CONFIRM_SECONDS : RED_CONFIRM_SECONDS;
+        if (displayedReadyToShoot != pendingReadyToShoot
+                && (now - pendingReadySinceNanos) / 1_000_000_000.0 >= confirmSeconds) {
+            displayedReadyToShoot = pendingReadyToShoot;
+        }
+        boolean readyToShoot = displayedReadyToShoot;
         boolean feedRequested = gamepad2.right_bumper;
 
         if (readyToShoot && !lastReadyToShoot) {
@@ -105,8 +159,10 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
         lastReadyToShoot = readyToShoot;
         if (feedRequested && !lastFeedRequested) {
             RobotLog.ii(TAG,
-                    "SHOT range=%.1f targetRpm=%.0f actualRpm=%.0f bearing=%.1f yawError=%.1f yawLimit=%.1f roll=%.1f ready=%d",
-                    target.rangeInches, targetRpm, actualRpm, target.bearingDegrees,
+                    "SHOT range=%.1f minRange=%.1f targetRpm=%.0f actualRpm=%.0f bearing=%.1f bearingMin=%.1f bearingMax=%.1f yawError=%.1f yawLimit=%.1f roll=%.1f ready=%d",
+                    target.rangeInches, minimumReadyDistance, targetRpm, actualRpm,
+                    target.bearingDegrees,
+                    target.allowedMinBearingDegrees, target.allowedMaxBearingDegrees,
                     target.yawFaceErrorDegrees, target.allowedYawErrorDegrees,
                     target.rollDegrees, readyToShoot ? 1 : 0);
         }
@@ -120,19 +176,23 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
             telemetry.addData("Yaw gate", "face error %.1f <= %.1f deg at %.1fin",
                     target.yawFaceErrorDegrees, target.allowedYawErrorDegrees,
                     target.rangeInches);
-            telemetry.addData("Aim checks", "bearing %+.1f to %+.1f deg; distance-adjusted yaw",
-                    MIN_READY_BEARING_DEGREES, MAX_READY_BEARING_DEGREES);
-            telemetry.addData("Roll", "%+.1f deg (informational; cluster value was unstable)",
-                    target.rollDegrees);
+            telemetry.addData("Bearing gate", "%+.1f <= %+.1f <= %+.1f deg (narrows with yaw)",
+                    target.allowedMinBearingDegrees, target.bearingDegrees,
+                    target.allowedMaxBearingDegrees);
+            telemetry.addData("Target approach angle", "%.1f deg absolute roll",
+                    Math.abs(target.rollDegrees));
+            telemetry.addData("Minimum shooting distance", "%.1f inches (adjusted for target angle)",
+                    minimumReadyDistance);
         }
         telemetry.addData("Shooter readiness", "%.0f / %.0f ticks/s; %s",
                 actualVelocity, launcherTargetVelocity,
                 readyToShoot ? "READY - PRESS RB TO FEED" : "NOT READY");
         telemetry.addData("Shooter RPM", "actual %.0f / target %.0f",
                 actualRpm, targetRpm);
-        telemetry.addData("RPM calibration", "%.0fin=%.1f, %.0fin=%.1f, %.0fin=%.1f",
+        telemetry.addData("RPM calibration", "%.0fin=%.1f, %.0fin=%.1f, %.0fin=%.1f, %.0fin=%.1f",
                 CLOSE_DISTANCE_INCHES, CLOSE_SHOOTER_RPM,
                 MID_DISTANCE_INCHES, MID_SHOOTER_RPM,
+                LONG_DISTANCE_INCHES, LONG_SHOOTER_RPM,
                 FAR_DISTANCE_INCHES, FAR_SHOOTER_RPM);
         return readyToShoot;
     }
@@ -205,6 +265,8 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
         final double rollDegrees;
         final double yawFaceErrorDegrees;
         final double allowedYawErrorDegrees;
+        final double allowedMinBearingDegrees;
+        final double allowedMaxBearingDegrees;
         final boolean angleReady;
 
         TargetObservation(String name, double rangeInches, double bearingDegrees,
@@ -227,8 +289,19 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
             this.allowedYawErrorDegrees = NEAR_MAX_YAW_ERROR_DEGREES
                     + distanceRatio * (FAR_MAX_YAW_ERROR_DEGREES
                     - NEAR_MAX_YAW_ERROR_DEGREES);
-            this.angleReady = bearingDegrees >= MIN_READY_BEARING_DEGREES
-                    && bearingDegrees <= MAX_READY_BEARING_DEGREES
+            double yawNarrowingRatio = Range.clip(
+                    yawFaceErrorDegrees / BEARING_NARROWING_YAW_DEGREES,
+                    0.0, 1.0);
+            double bearingScale = 1.0 - yawNarrowingRatio
+                    * (1.0 - BEARING_WIDTH_AT_45_DEGREES);
+            double bearingCenter = (MIN_READY_BEARING_DEGREES
+                    + MAX_READY_BEARING_DEGREES) / 2.0;
+            double bearingHalfWidth = (MAX_READY_BEARING_DEGREES
+                    - MIN_READY_BEARING_DEGREES) / 2.0 * bearingScale;
+            this.allowedMinBearingDegrees = bearingCenter - bearingHalfWidth;
+            this.allowedMaxBearingDegrees = bearingCenter + bearingHalfWidth;
+            this.angleReady = bearingDegrees >= allowedMinBearingDegrees
+                    && bearingDegrees <= allowedMaxBearingDegrees
                     && yawFaceErrorDegrees <= allowedYawErrorDegrees;
         }
 
@@ -242,6 +315,8 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
             rollDegrees = Double.NaN;
             yawFaceErrorDegrees = Double.NaN;
             allowedYawErrorDegrees = Double.NaN;
+            allowedMinBearingDegrees = Double.NaN;
+            allowedMaxBearingDegrees = Double.NaN;
             angleReady = false;
         }
 

@@ -243,9 +243,9 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         updateAutomaticShooterTarget();
         launch();
         double launcherVelocity = launcher == null ? 0.0 : launcher.getVelocity();
-        double feedReadyVelocity = WINDMILL_FEED_READY_FRACTION_OF_TARGET
+        double feedReadyVelocity = windmillFeedReadyFraction()
                 * launcherTargetVelocity;
-        double feedPauseVelocity = WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET
+        double feedPauseVelocity = windmillFeedPauseFraction()
                 * launcherTargetVelocity;
         boolean shooting = (gamepad2.right_bumper || turbo) && allowShootingFeed();
         if (!shooting) {
@@ -546,6 +546,14 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     /** Specialized TeleOps may prevent feeding until their targeting checks pass. */
     protected boolean allowShootingFeed() {
         return true;
+    }
+
+    protected double windmillFeedReadyFraction() {
+        return WINDMILL_FEED_READY_FRACTION_OF_TARGET;
+    }
+
+    protected double windmillFeedPauseFraction() {
+        return WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET;
     }
 
     protected double normalShooterFraction() {

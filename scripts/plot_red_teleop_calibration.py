@@ -3,17 +3,13 @@ import numpy as np
 
 
 # Current calibrated RPM anchors.
-anchor_distance = np.array([30.0, 34.0, 120.0])
-anchor_rpm = np.array([29.0, 31.5, 34.2])
+anchor_distance = np.array([30.0, 34.0, 40.0, 120.0])
+anchor_rpm = np.array([29.0, 31.5, 33.0, 34.2])
 
 
 def calibrated_rpm(distance):
     distance = np.asarray(distance)
-    return np.where(
-        distance <= 34.0,
-        np.interp(distance, [30.0, 34.0], [29.0, 31.5]),
-        np.interp(distance, [34.0, 120.0], [31.5, 34.2]),
-    )
+    return np.interp(distance, anchor_distance, anchor_rpm)
 
 
 # Groups with a valid camera distance and a reported outcome.
@@ -34,10 +30,32 @@ groups = [
     (33.6, 31.0, 0, 2, "0/2 left", False),
     (33.7, 31.3, 2, 3, "2/3; 1 short", True),
     (33.7, 31.3, 4, 4, "4/4", True),
+    (39.6, 31.7, 0, 4, "0/4 short", True),
+    (40.0, 33.0, 2, 4, "2/4; new 40in anchor", True),
+    # Straight-on close-range calibration.
+    (27.3, 29.0, 2, 2, "2/2 front", True),
+    (25.0, 29.0, 4, 4, "4/4 front", True),
+    (24.7, 29.0, 1, 4, "1/4 mixed front", True),
+    (24.6, 29.0, 3, 4, "3/4 front", True),
+    (23.6, 29.0, 0, 4, "0/4 lower rim", True),
+    # Oblique approach: roll/approach angle was about 26-36 degrees.
+    (32.7, 31.0, 3, 3, "3/3 angled", True),
+    (30.0, 29.0, 4, 4, "4/4 angled", True),
+    (29.0, 29.0, 3, 4, "3/4 angled", True),
+    (27.1, 29.0, 3, 4, "3/4 angled", True),
+    (27.1, 29.0, 3, 4, "3/4 angled", True),
+    (25.3, 29.0, 2, 4, "2/4 lower rim", True),
+    (24.4, 29.0, 1, 4, "1/4 lower rim", True),
+    (23.8, 29.0, 0, 4, "0/4 lower rim", True),
+    # Same-distance alignment comparison; left-rim misses do not tune RPM.
+    (32.6, 31.0, 2, 4, "2/4 left rim", False),
+    (31.2, 30.0, 4, 4, "4/4 aligned", True),
+    (27.9, 29.0, 4, 4, "4/4 angled", True),
+    (26.0, 29.0, 4, 4, "4/4 at min", True),
 ]
 
 fig, (ax_curve, ax_rate) = plt.subplots(
-    2, 1, figsize=(11, 9), gridspec_kw={"height_ratios": [2.0, 1.2]}
+    2, 1, figsize=(15, 11), gridspec_kw={"height_ratios": [2.0, 1.2]}
 )
 
 distance_line = np.linspace(20, 120, 500)
@@ -57,6 +75,10 @@ ax_curve.scatter(
     zorder=5,
     label="Calibration anchors",
 )
+ax_curve.axvspan(20, 24, color="#c62828", alpha=0.06,
+                 label="Too close at every approach angle")
+ax_curve.axvspan(24, 27, color="#ffb300", alpha=0.07,
+                 label="Minimum distance varies with approach angle")
 
 for distance, rpm, scored, total, note, usable in groups:
     success = scored / total
@@ -64,8 +86,9 @@ for distance, rpm, scored, total, note, usable in groups:
     marker = "o" if usable else "X"
     ax_curve.scatter(distance, rpm, s=85, marker=marker, color=color,
                      edgecolor="black", linewidth=0.7, zorder=4)
-    ax_curve.annotate(note, (distance, rpm), xytext=(5, 7),
-                      textcoords="offset points", fontsize=8)
+    if not usable or distance >= 39.0:
+        ax_curve.annotate(note, (distance, rpm), xytext=(5, 7),
+                          textcoords="offset points", fontsize=8)
 
 ax_curve.set_title("Red TeleOp Shooter Calibration: Distance vs. Wheel RPM", fontsize=15)
 ax_curve.set_xlabel("AprilTag range (inches)")
@@ -90,7 +113,7 @@ rates = [100.0 * g[2] / g[3] for g in usable_groups]
 colors = [plt.cm.RdYlGn(rate / 100.0) for rate in rates]
 bars = ax_rate.bar(np.arange(len(rates)), rates, color=colors,
                    edgecolor="black", linewidth=0.6)
-ax_rate.set_xticks(np.arange(len(labels)), labels)
+ax_rate.set_xticks(np.arange(len(labels)), labels, rotation=45, ha="right")
 ax_rate.set_ylim(0, 110)
 ax_rate.set_ylabel("Scored (%)")
 ax_rate.set_title("Speed-relevant test groups")
