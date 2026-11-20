@@ -152,6 +152,8 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
             webcamPortal = new VisionPortal.Builder()
                     .setCamera(webcam)
                     .setCameraResolution(webcamResolution())
+                    .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                    .enableLiveView(false)
                     .addProcessor(aprilTags)
                     .build();
         } else if (USB_WEBCAM_ENABLED) {
@@ -228,7 +230,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     public void loop() {
         mecanumDrive(applyDriveDeadzone(-gamepad1.left_stick_y),
                 applyDriveDeadzone(gamepad1.left_stick_x),
-                applyDriveDeadzone(gamepad1.right_stick_x));
+                assistedRotation(applyDriveDeadzone(gamepad1.right_stick_x)));
         updateArm();
 
         if (gamepad2.right_trigger > 0) {
@@ -438,6 +440,7 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     private void showLight(Light light) {
         boolean changed = light != currentLight;
         boolean hadPattern = currentLight != null;
+        Light previousLight = currentLight;
         currentLight = light;
         if (changed) {
             for (LynxModule hub : hubs) {
@@ -462,6 +465,13 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
                 gamepad2.setLedColor(0.0, 0.0, 1.0, Gamepad.LED_DURATION_CONTINUOUS);
             } else {
                 gamepad2.setLedColor(0.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS);
+            }
+            if (previousLight == Light.RED && light == Light.GREEN) {
+                // Couple driver feedback to the actual displayed transition. A
+                // strong, explicit command is more noticeable than rumbleBlips
+                // and works independently of the targeting implementation.
+                gamepad2.rumble(1.0, 1.0, 750);
+                RobotLog.ii(TAG, "GAMEPAD2_READY_FEEDBACK red_to_green rumble=750ms");
             }
         }
         if (gobildaLightServos != null) {
@@ -546,6 +556,11 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
     /** Specialized TeleOps may prevent feeding until their targeting checks pass. */
     protected boolean allowShootingFeed() {
         return true;
+    }
+
+    /** Allows specialized modes to provide a driver-requested rotation assist. */
+    protected double assistedRotation(double manualRotation) {
+        return manualRotation;
     }
 
     protected double windmillFeedReadyFraction() {

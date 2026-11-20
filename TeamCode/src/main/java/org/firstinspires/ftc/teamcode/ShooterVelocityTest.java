@@ -13,7 +13,9 @@ import com.qualcomm.robotcore.util.RobotLog;
 @TeleOp(name = "Shooter Velocity Test", group = "Jimothy Calibration")
 public class ShooterVelocityTest extends OpMode {
     private static final String TAG = "ShooterVelocityTest";
-    private static final double NORMAL_SPEED_FRACTION = 0.4635;
+    // Match the close-position Red/Blue TeleOp command exactly so unloaded
+    // vibration at this specific speed can be isolated from windmill loading.
+    private static final double NORMAL_TARGET_VELOCITY = 1347.0;
     private static final double TURBO_SPEED_FRACTION = 0.6179976;
     private static final double READY_FRACTION = 0.97;
     private static final double WINDMILL_POWER = -0.25;
@@ -52,7 +54,7 @@ public class ShooterVelocityTest extends OpMode {
 
         maxVelocity = shooter.getMotorType().getMaxRPM()
                 * shooter.getMotorType().getTicksPerRev() / 60.0;
-        targetVelocity = NORMAL_SPEED_FRACTION * maxVelocity;
+        targetVelocity = NORMAL_TARGET_VELOCITY;
         telemetry.addLine("Either gamepad: RB normal | A turbo | X feed | B reset");
         telemetry.addLine("Secure the robot and keep clear of the shooter.");
     }
@@ -73,7 +75,9 @@ public class ShooterVelocityTest extends OpMode {
         boolean turbo = gamepad1.a || gamepad2.a;
         boolean shooterRequested = gamepad1.right_bumper || gamepad2.right_bumper || turbo;
         boolean feedRequested = (gamepad1.x || gamepad2.x) && shooterRequested;
-        targetVelocity = (turbo ? TURBO_SPEED_FRACTION : NORMAL_SPEED_FRACTION) * maxVelocity;
+        targetVelocity = turbo
+                ? TURBO_SPEED_FRACTION * maxVelocity
+                : NORMAL_TARGET_VELOCITY;
         shooter.setVelocity(shooterRequested ? targetVelocity : 0.0);
         windmill.setPower(feedRequested ? WINDMILL_POWER : 0.0);
 

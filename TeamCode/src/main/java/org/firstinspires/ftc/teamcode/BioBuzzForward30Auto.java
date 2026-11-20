@@ -116,6 +116,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SECOND_INTAKE_X_INCHES = -121.07;
     private static final double SECOND_INTAKE_Y_INCHES = -15.38;
     private static final double SECOND_INTAKE_HEADING_DEGREES = -170.0;
+    private static final double SECOND_SHOOTING_RIGHT_OFFSET_INCHES = 2.0;
     private static final double SECOND_SHOOTING_X_INCHES = -120.80;
     private static final double SECOND_SHOOTING_Y_INCHES = -0.90;
     private static final double SECOND_SHOOTING_CAPTURED_HEADING_DEGREES = -180.0;
@@ -357,9 +358,15 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         "Segment: diagonal to second intake position", 6.0,
                         0.25)) return;
 
-                // The second intake pose is complete, so the shooter may now restart.
+                // Shift two inches robot-right for the second shot. The later
+                // one-inch-left flower approach leaves the final collection
+                // and shooting lane net one inch right of the original lane.
                 startShooter(secondShooterVelocity);
                 stopIntake();
+                if (!driveRobotRelative(0.0, -SECOND_SHOOTING_RIGHT_OFFSET_INCHES,
+                        SECOND_INTAKE_HEADING_DEGREES,
+                        "Shift right 2 inches to second shooting position",
+                        true, 2.0)) return;
                 if (!waitForSecondShotTarget()) {
                     RobotLog.ww(TAG,
                             "SECOND_SHOT_SKIPPED id=%s target=%s reason=tag_not_detected",
@@ -391,17 +398,27 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 finishLoweringArmForIntake();
                 startIntake();
                 startShooter(secondShooterVelocity);
-                shootingState = "SECOND SHOT COMPLETE - INTAKE FORWARD 10 INCHES";
-                if (!driveIntakeNudge(10.0, 0.60)) return;
-                shootingState = "INTAKE AND SHOOTER RUNNING - WAITING FOR STOP";
-        while (autonomousMayContinue()) {
-                    startIntake();
-                    shooter.setVelocity(secondShooterVelocity);
-                    windmill.setPower(0);
-                    addShootingTelemetry();
-                    telemetry.update();
-                    idle();
-                }
+                shootingState = "SECOND SHOT COMPLETE - INTAKE FORWARD 10, LEFT 1";
+                if (!driveRobotRelative(10.0, 1.0,
+                        SECOND_INTAKE_HEADING_DEGREES,
+                        "Intake forward 10 inches and left 1 inch",
+                        true, 3.0)) return;
+
+                shootingState = "FINAL BALLS - SETTLING IN INTAKE";
+                sleep(500);
+                if (!driveIntakeNudge(-3.0, 0.60)) return;
+                if (!driveIntakeNudge(3.0, 0.60)) return;
+
+                shootingState = "FINAL BALLS - SHOOTING";
+                startIntake();
+                shooter.setVelocity(secondShooterVelocity);
+                runShooterAndWindmill(false, SHOOTING_SECONDS);
+                stopIntake();
+                shooter.setVelocity(0);
+                windmill.setPower(0);
+                shootingState = "FINAL SHOT COMPLETE - PARKING";
+                if (!parkTwoFeetRobotLeft()) return;
+                shootingState = "PARKED - FINAL SHOT COMPLETE";
             }
         } catch (ForcedParkException ignored) {
             forcedParkInProgress = true;
@@ -412,6 +429,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             shootingState = "5 SECONDS REMAINING - FORCED PARK";
             RobotLog.ww(TAG, "FORCED_PARK id=%s elapsed=%.1f", runId,
                     autonomousTimer.seconds());
+            telemetry.addLine("5 seconds remain; stopping the sequence and parking now.");
+            telemetry.addData("Autonomous elapsed", "%.1f sec",
+                    autonomousTimer.seconds());
+            addShootingTelemetry();
+            telemetry.update();
             parkTwoFeetRobotLeft();
             shootingState = "PARKED - TIME LIMIT";
         } finally {
@@ -513,9 +535,13 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 runId, x, y, Math.toDegrees(heading),
                 FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
                 FINAL_PARK_HEADING_DEGREES);
-        return followLineSegment(FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
+        if (!followLineSegment(FINAL_PARK_X_INCHES, FINAL_PARK_Y_INCHES,
                 FINAL_PARK_HEADING_DEGREES,
-                "Segment: park at recorded field position", 7.0);
+                "Segment: park at recorded field position", 7.0)) return false;
+        return driveRobotRelative(-5.0, 0.0,
+                FINAL_PARK_HEADING_DEGREES,
+                "Back up 5 inches after reaching park",
+                true, 2.0);
     }
 
     private void startShooter(double targetVelocity) {
@@ -1318,7 +1344,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         final double unitY = segmentY / segmentLength;
         final double targetHeading = Math.toRadians(targetHeadingDegrees);
         final double lookaheadInches = 10.0;
-        final double maxTranslation = 0.85;
+        final double maxTranslation = 0.95;
         final double minTranslation = 0.20;
         final double rampDistance = 14.0;
         final double headingKp = 1.15;

@@ -1,0 +1,180 @@
+<div id="ftc-targeting-geometry">
+  <style>
+    #ftc-targeting-geometry { color: var(--foreground); display: grid; gap: calc(var(--font-size-base) * 1); }
+    #ftc-targeting-geometry .intro { display: grid; gap: calc(var(--font-size-base) * .35); padding-right: 96px; }
+    #ftc-targeting-geometry .controls { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: calc(var(--font-size-base) * .75); }
+    #ftc-targeting-geometry .control { display: grid; gap: calc(var(--font-size-base) * .25); min-width: 0; }
+    #ftc-targeting-geometry .control-head { display:flex; justify-content:space-between; gap:8px; }
+    #ftc-targeting-geometry .panels { display:grid; grid-template-columns: 1fr 1.35fr; gap: calc(var(--font-size-base) * 1); align-items:start; }
+    #ftc-targeting-geometry .panel { display:grid; gap: calc(var(--font-size-base) * .35); min-width:0; }
+    #ftc-targeting-geometry svg { width:100%; height:auto; overflow:visible; }
+    #ftc-targeting-geometry .structure { stroke:var(--border); stroke-width:2; fill:none; }
+    #ftc-targeting-geometry .muted-line { stroke:var(--muted-foreground); stroke-width:1.5; fill:none; }
+    #ftc-targeting-geometry .dash { stroke-dasharray:6 5; }
+    #ftc-targeting-geometry .active-line { stroke:var(--viz-series-1); stroke-width:3; fill:none; }
+    #ftc-targeting-geometry .target-line { stroke:var(--viz-series-2); stroke-width:3; fill:none; }
+    #ftc-targeting-geometry .safe { fill:color-mix(in srgb, var(--green) 18%, transparent); stroke:var(--green); stroke-width:1.5; }
+    #ftc-targeting-geometry .unsafe { fill:color-mix(in srgb, var(--red) 12%, transparent); }
+    #ftc-targeting-geometry .robot { fill:var(--viz-series-1); }
+    #ftc-targeting-geometry .goal-red { fill:color-mix(in srgb, var(--red) 22%, transparent); stroke:var(--red); stroke-width:2; }
+    #ftc-targeting-geometry .goal-blue { fill:color-mix(in srgb, var(--blue) 22%, transparent); stroke:var(--blue); stroke-width:2; }
+    #ftc-targeting-geometry .label { fill:var(--foreground); font-size:12px; }
+    #ftc-targeting-geometry .muted-label { fill:var(--muted-foreground); font-size:11px; }
+    #ftc-targeting-geometry .status { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(var(--font-size-base)*.5); }
+    #ftc-targeting-geometry .viz-stat-value { white-space:nowrap; }
+    #ftc-targeting-geometry .equation { display:flex; justify-content:center; align-items:center; gap:calc(var(--font-size-base)*.45); flex-wrap:wrap; }
+    #ftc-targeting-geometry .arrow { color:var(--muted-foreground); }
+    @media (max-width:760px){
+      #ftc-targeting-geometry .controls { grid-template-columns:1fr 1fr; }
+      #ftc-targeting-geometry .panels { grid-template-columns:1fr; }
+      #ftc-targeting-geometry .status { grid-template-columns:1fr; }
+    }
+    @media (max-width:420px){ #ftc-targeting-geometry .controls { grid-template-columns:1fr; } }
+  </style>
+
+  <div class="intro">
+    <h1>Field & targeting geometry</h1>
+    <p class="text-muted">Move the controls to see how target side, distance, approach angle, and camera bearing determine shooter RPM and readiness.</p>
+  </div>
+
+  <div class="controls viz-controls" aria-label="Targeting inputs">
+    <label class="control form-label">Target
+      <select id="ftc-target" class="form-select">
+        <option value="red-scoring">Red scoring</option>
+        <option value="red-audience">Red audience</option>
+        <option value="blue-scoring">Blue scoring</option>
+        <option value="blue-audience">Blue audience</option>
+      </select>
+    </label>
+    <label class="control form-label">
+      <span class="control-head"><span>Distance</span><span><b id="distance-out">30</b> in</span></span>
+      <input id="distance" class="form-range" type="range" min="20" max="120" step="1" value="30">
+    </label>
+    <label class="control form-label">
+      <span class="control-head"><span>Approach angle</span><span><b id="approach-out">0</b>°</span></span>
+      <input id="approach" class="form-range" type="range" min="-45" max="45" step="1" value="0">
+    </label>
+    <label class="control form-label">
+      <span class="control-head"><span>Camera bearing</span><span><b id="bearing-out">4</b>°</span></span>
+      <input id="bearing" class="form-range" type="range" min="-35" max="35" step="0.5" value="4">
+    </label>
+  </div>
+
+  <div class="status" aria-live="polite">
+    <div class="card viz-stat"><span class="text-muted">Shooter target</span><span class="viz-stat-value" id="rpm-stat">29.0 RPM</span><span class="text-small text-muted" id="rpm-note">distance interpolation</span></div>
+    <div class="card viz-stat"><span class="text-muted">Allowed bearing</span><span class="viz-stat-value" id="window-stat">−18° to +26°</span><span class="text-small text-muted" id="desired-note">preferred +4°</span></div>
+    <div class="card viz-stat"><span class="text-muted">Indicator</span><span class="viz-stat-value" id="ready-stat">GREEN</span><span class="text-small text-muted" id="ready-note">distance and bearing pass</span></div>
+  </div>
+
+  <div class="panels">
+    <section class="panel">
+      <h2>1 · Symmetric field targets</h2>
+      <svg viewBox="0 0 420 300" role="img" aria-label="Overhead field showing mirrored red and blue targets">
+        <rect x="25" y="25" width="370" height="250" rx="4" class="structure"/>
+        <line x1="210" y1="25" x2="210" y2="275" class="muted-line dash"/>
+        <text x="210" y="292" text-anchor="middle" class="muted-label">field mirror line</text>
+        <rect x="48" y="38" width="92" height="22" rx="4" class="goal-blue"/>
+        <text x="94" y="53" text-anchor="middle" class="label">BLUE SCORING</text>
+        <rect x="280" y="38" width="92" height="22" rx="4" class="goal-red"/>
+        <text x="326" y="53" text-anchor="middle" class="label">RED SCORING</text>
+        <rect x="48" y="240" width="92" height="22" rx="4" class="goal-blue"/>
+        <text x="94" y="255" text-anchor="middle" class="label">BLUE AUDIENCE</text>
+        <rect x="280" y="240" width="92" height="22" rx="4" class="goal-red"/>
+        <text x="326" y="255" text-anchor="middle" class="label">RED AUDIENCE</text>
+        <path d="M158 92 C180 78 196 76 210 76 C224 76 240 78 262 92" class="muted-line"/>
+        <path d="M158 208 C180 222 196 224 210 224 C224 224 240 222 262 208" class="muted-line"/>
+        <text x="210" y="115" text-anchor="middle" class="muted-label">bearing sign and left/right room mirror</text>
+        <text x="210" y="194" text-anchor="middle" class="muted-label">RPM vs distance stays identical</text>
+        <circle id="field-robot" cx="260" cy="150" r="9" class="robot"/>
+        <line id="field-ray" x1="260" y1="150" x2="326" y2="60" class="active-line"/>
+        <text id="field-selected" x="210" y="148" text-anchor="middle" class="label">RED SCORING selected</text>
+      </svg>
+    </section>
+
+    <section class="panel">
+      <h2>2 · Bearing window at the target</h2>
+      <svg viewBox="0 0 560 300" role="img" aria-label="Top-down bearing and approach-angle targeting diagram">
+        <path id="unsafe-left" class="unsafe"/>
+        <path id="safe-wedge" class="safe"/>
+        <path id="unsafe-right" class="unsafe"/>
+        <line x1="280" y1="45" x2="280" y2="260" class="muted-line dash"/>
+        <rect x="235" y="25" width="90" height="22" rx="4" id="goal-box" class="goal-red"/>
+        <text x="280" y="40" text-anchor="middle" class="label" id="goal-label">RED SCORING</text>
+        <circle cx="280" cy="245" r="10" class="robot"/>
+        <line id="bearing-ray" x1="280" y1="245" x2="280" y2="45" class="active-line"/>
+        <line id="desired-ray" x1="280" y1="245" x2="280" y2="45" class="target-line dash"/>
+        <text x="14" y="284" class="muted-label">negative bearing ←</text>
+        <text x="546" y="284" text-anchor="end" class="muted-label">→ positive bearing</text>
+        <text id="approach-label" x="280" y="275" text-anchor="middle" class="label">approach 0°</text>
+      </svg>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>3 · Distance changes speed; approach changes the allowed shot</h2>
+    <svg viewBox="0 0 960 240" role="img" aria-label="Shooter RPM calibration curve and angle dependent readiness">
+      <line x1="70" y1="190" x2="900" y2="190" class="structure"/>
+      <line x1="70" y1="35" x2="70" y2="190" class="structure"/>
+      <polyline points="153,169 187,133 237,111 900,91" class="active-line"/>
+      <circle cx="153" cy="169" r="5" class="robot"/><circle cx="187" cy="133" r="5" class="robot"/><circle cx="237" cy="111" r="5" class="robot"/><circle cx="900" cy="91" r="5" class="robot"/>
+      <text x="153" y="211" text-anchor="middle" class="muted-label">30 in</text><text x="187" y="211" text-anchor="middle" class="muted-label">34</text><text x="237" y="211" text-anchor="middle" class="muted-label">40</text><text x="900" y="211" text-anchor="middle" class="muted-label">120</text>
+      <text x="142" y="158" text-anchor="end" class="label">29 RPM</text><text x="198" y="126" class="label">31.5</text><text x="248" y="104" class="label">33</text><text x="890" y="81" text-anchor="end" class="label">34.2</text>
+      <line id="rpm-marker" x1="153" y1="190" x2="153" y2="169" class="target-line dash"/>
+      <circle id="rpm-dot" cx="153" cy="169" r="7" fill="var(--viz-series-2)"/>
+      <text x="24" y="32" class="muted-label">RPM</text>
+      <text x="920" y="211" class="muted-label">distance</text>
+    </svg>
+    <div class="equation text-small">
+      <span>Distance → shooter RPM</span><span class="arrow">+</span><span>approach → mirrored window & minimum distance</span><span class="arrow">+</span><span>bearing inside window</span><span class="arrow">→</span><b id="equation-result">GREEN</b>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const root=document.getElementById('ftc-targeting-geometry');
+      const $=id=>root.querySelector('#'+id);
+      const state={target:'red-scoring',distance:30,approach:0,bearing:4};
+      const defs={
+        'red-scoring':{label:'RED SCORING',color:'red',mirror:false,goal:[326,60]},
+        'red-audience':{label:'RED AUDIENCE',color:'red',mirror:true,goal:[326,240]},
+        'blue-scoring':{label:'BLUE SCORING',color:'blue',mirror:true,goal:[94,60]},
+        'blue-audience':{label:'BLUE AUDIENCE',color:'blue',mirror:false,goal:[94,240]}
+      };
+      const interp=(a,n,z,p)=>a<0?n+((a+45)/45)*(z-n):z+(a/45)*(p-z);
+      const rpm=d=>d<=34?29+Math.max(0,Math.min(1,(d-30)/4))*2.5:d<=40?31.5+((d-34)/6)*1.5:33+Math.max(0,Math.min(1,(d-40)/80))*1.2;
+      const fmt=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(1)+'°';
+      const polar=(cx,cy,r,deg)=>{const a=(deg-90)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+      const wedge=(a,b,r=200)=>{const p1=polar(280,245,r,a),p2=polar(280,245,r,b);return `M280 245 L${p1[0]} ${p1[1]} A${r} ${r} 0 0 1 ${p2[0]} ${p2[1]} Z`};
+      function calculate(){
+        const d=defs[state.target],cal=d.mirror?-state.approach:state.approach;
+        const baseDesired=interp(cal,2.8,4,2.8),desired=d.mirror?-baseDesired:baseDesired;
+        const bl=interp(cal,4,22,4),br=interp(cal,5,22,5);
+        const left=d.mirror?br:bl,right=d.mirror?bl:br;
+        const min=interp(cal,27,24,27),lo=desired-left,hi=desired+right;
+        return {d,cal,desired,left,right,min,lo,hi,rpm:rpm(state.distance),ready:state.distance>=min&&state.bearing>=lo&&state.bearing<=hi};
+      }
+      function render(){
+        const c=calculate();
+        $('distance-out').textContent=state.distance.toFixed(0); $('approach-out').textContent=state.approach.toFixed(0); $('bearing-out').textContent=state.bearing.toFixed(1);
+        $('rpm-stat').textContent=c.rpm.toFixed(1)+' RPM'; $('rpm-note').textContent=`minimum ${c.min.toFixed(1)} in at this approach`;
+        $('window-stat').textContent=`${fmt(c.lo)} to ${fmt(c.hi)}`; $('desired-note').textContent=`preferred ${fmt(c.desired)}`;
+        $('ready-stat').textContent=c.ready?'GREEN':'RED'; $('ready-note').textContent=c.ready?'distance and bearing pass':state.distance<c.min?'too close for this approach':'bearing outside allowed window';
+        $('equation-result').textContent=c.ready?'GREEN':'RED'; $('equation-result').style.color=`var(--${c.ready?'green':'red'})`;
+        $('field-selected').textContent=c.d.label+' selected'; $('field-ray').setAttribute('x2',c.d.goal[0]); $('field-ray').setAttribute('y2',c.d.goal[1]);
+        const rx=c.d.goal[0]+(c.d.goal[0]<210?65:-65),ry=c.d.goal[1]+(c.d.goal[1]<150?75:-75); $('field-robot').setAttribute('cx',rx); $('field-robot').setAttribute('cy',ry); $('field-ray').setAttribute('x1',rx); $('field-ray').setAttribute('y1',ry);
+        $('goal-label').textContent=c.d.label; $('goal-box').setAttribute('class',c.d.color==='red'?'goal-red':'goal-blue');
+        $('safe-wedge').setAttribute('d',wedge(c.lo,c.hi)); $('unsafe-left').setAttribute('d',wedge(-35,c.lo)); $('unsafe-right').setAttribute('d',wedge(c.hi,35));
+        const bp=polar(280,245,200,state.bearing),dp=polar(280,245,200,c.desired); $('bearing-ray').setAttribute('x2',bp[0]); $('bearing-ray').setAttribute('y2',bp[1]); $('desired-ray').setAttribute('x2',dp[0]); $('desired-ray').setAttribute('y2',dp[1]);
+        $('approach-label').textContent=`camera approach ${fmt(state.approach)} · calibration ${fmt(c.cal)}`;
+        const x=70+(Math.max(20,Math.min(120,state.distance))-20)/100*830,y=190-(c.rpm-27)/8*155; $('rpm-marker').setAttribute('x1',x); $('rpm-marker').setAttribute('x2',x); $('rpm-marker').setAttribute('y2',y); $('rpm-dot').setAttribute('cx',x); $('rpm-dot').setAttribute('cy',y);
+        window.openai?.setWidgetState?.({modelContent:{target:state.target,distance:state.distance,approach:state.approach,bearing:state.bearing},privateContent:null}).catch(()=>{});
+      }
+      const saved=window.openai?.widgetState?.modelContent; if(saved&&defs[saved.target])Object.assign(state,saved);
+      $('ftc-target').value=state.target; $('distance').value=state.distance; $('approach').value=state.approach; $('bearing').value=state.bearing;
+      $('ftc-target').addEventListener('change',e=>{state.target=e.target.value;render()});
+      ['distance','approach','bearing'].forEach(id=>$(id).addEventListener('input',e=>{state[id]=Number(e.target.value);render()}));
+      window.addEventListener('openai:set_globals',e=>{const s=e.detail?.globals?.widgetState?.modelContent;if(s&&defs[s.target]){Object.assign(state,s);$('ftc-target').value=state.target;$('distance').value=state.distance;$('approach').value=state.approach;$('bearing').value=state.bearing;render()}});
+      render();
+    })();
+  </script>
+</div>
