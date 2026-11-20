@@ -34,12 +34,12 @@ public class BlueTeleOp extends RedTeleOp {
 
     @Override
     protected boolean isMirroredTargetSingleTag(int id) {
-        return id >= 38 && id <= 41;
+        return id >= 42 && id <= 45;
     }
 
     @Override
     protected String targetNameForSingleTag(int id) {
-        return id <= 41 ? "BLUE SCORING" : "BLUE AUDIENCE";
+        return id <= 41 ? "BLUE AUDIENCE" : "BLUE SCORING";
     }
 
     @Override

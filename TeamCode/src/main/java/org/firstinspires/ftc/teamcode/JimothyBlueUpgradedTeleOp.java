@@ -28,7 +28,7 @@ public class JimothyBlueUpgradedTeleOp extends JimothyUpgradedTeleOp {
 
     @Override
     protected String targetNameForSingleTag(int id) {
-        return id <= 41 ? "BLUE SCORING" : "BLUE AUDIENCE";
+        return id <= 41 ? "BLUE AUDIENCE" : "BLUE SCORING";
     }
 
     @Override

@@ -489,6 +489,10 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
             if (detection instanceof AprilTagClusterDetection) {
                 AprilTagClusterDetection cluster = (AprilTagClusterDetection) detection;
                 name = cluster.metadata == null ? "unknown cluster" : cluster.metadata.name;
+                // The SDK cluster solver returns the cluster-origin pose, not
+                // the center of whichever member tag happened to be visible.
+                // Its registered member offsets reconstruct the same physical
+                // target center at 25%, 50%, 75%, or 100% visibility.
                 allianceTarget = isTeleOpTargetCluster(name)
                         && cluster.percentClusterFound >= MIN_CLUSTER_VISIBILITY_PERCENT;
                 mirroredTarget = isMirroredTargetCluster(name);
