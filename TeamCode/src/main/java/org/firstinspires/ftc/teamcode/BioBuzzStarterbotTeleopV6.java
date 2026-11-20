@@ -269,9 +269,9 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
         if (shooting) {
             windmillPower = windmillFeedArmed ? WINDMILL_CONTINUOUS_POWER : 0.0;
         } else if (gamepad2.left_bumper) {
-            windmillPower = WINDMILL_CONTINUOUS_POWER;
+            windmillPower = leftBumperWindmillPower();
         } else if (gamepad2.left_trigger > 0) {
-            windmillPower = WINDMILL_CONTINUOUS_POWER * gamepad2.left_trigger;
+            windmillPower = leftTriggerWindmillPower(gamepad2.left_trigger);
         } else {
             windmillPower = 0.0;
         }
@@ -569,6 +569,16 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
     protected double windmillFeedPauseFraction() {
         return WINDMILL_FEED_PAUSE_FRACTION_OF_TARGET;
+    }
+
+    /** Direction/power for the direct left-bumper windmill control. */
+    protected double leftBumperWindmillPower() {
+        return WINDMILL_CONTINUOUS_POWER;
+    }
+
+    /** Optional legacy windmill control while the reverse-intake trigger is held. */
+    protected double leftTriggerWindmillPower(double trigger) {
+        return WINDMILL_CONTINUOUS_POWER * trigger;
     }
 
     protected double normalShooterFraction() {

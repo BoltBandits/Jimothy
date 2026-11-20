@@ -58,12 +58,13 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
     private static final double TARGET_MEMORY_SECONDS = 3.0;
     private static final double GREEN_CONFIRM_SECONDS = 0.05;
     private static final double RED_CONFIRM_SECONDS = 0.10;
-    private static final double AUTO_AIM_MAX_ERROR_DEGREES = 45.0;
-    private static final double AUTO_AIM_TOLERANCE_DEGREES = 0.8;
-    private static final double AUTO_AIM_KP = 0.028;
-    private static final double AUTO_AIM_MIN_POWER = 0.08;
-    private static final double AUTO_AIM_MAX_POWER = 0.32;
-    private static final double AUTO_AIM_FILTER_ALPHA = 0.35;
+    private static final double AUTO_AIM_TOLERANCE_DEGREES = 1.5;
+    private static final double AUTO_AIM_FAR_KP = 0.012;
+    private static final double AUTO_AIM_MID_KP = 0.009;
+    private static final double AUTO_AIM_NEAR_KP = 0.006;
+    private static final double AUTO_AIM_MIN_POWER = 0.025;
+    private static final double AUTO_AIM_MAX_POWER = 0.18;
+    private static final double AUTO_AIM_FILTER_ALPHA = 0.85;
     private static final double LEFT_TICKS_PER_INCH = 503.47;
     private static final double RIGHT_TICKS_PER_INCH = 504.53;
     private static final double CENTER_TICKS_PER_INCH = 510.30;
@@ -221,6 +222,17 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
     }
 
     @Override
+    protected double leftBumperWindmillPower() {
+        return -super.leftBumperWindmillPower();
+    }
+
+    @Override
+    protected double leftTriggerWindmillPower(double trigger) {
+        // In Red/Blue TeleOp the triggers control only the intake.
+        return 0.0;
+    }
+
+    @Override
     protected double assistedRotation(double manualRotation) {
         if (!gamepad2.a || Math.abs(manualRotation) > 0.05 || !target.hasRange) {
             filteredAimErrorDegrees = Double.NaN;
@@ -229,10 +241,6 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
 
         double desiredBearing = target.desiredBearingDegrees;
         double rawBearingError = target.bearingDegrees - desiredBearing;
-        if (Math.abs(rawBearingError) > AUTO_AIM_MAX_ERROR_DEGREES) {
-            filteredAimErrorDegrees = Double.NaN;
-            return 0.0;
-        }
         filteredAimErrorDegrees = Double.isNaN(filteredAimErrorDegrees)
                 ? rawBearingError
                 : AUTO_AIM_FILTER_ALPHA * rawBearingError
@@ -243,7 +251,11 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
 
         // Positive camera bearing requires the opposite drivetrain rotation
         // sign from the manual right-stick convention.
-        double rotation = Range.clip(-filteredAimErrorDegrees * AUTO_AIM_KP,
+        double absoluteError = Math.abs(filteredAimErrorDegrees);
+        double gain = absoluteError > 15.0 ? AUTO_AIM_FAR_KP
+                : absoluteError > 5.0 ? AUTO_AIM_MID_KP
+                : AUTO_AIM_NEAR_KP;
+        double rotation = Range.clip(-filteredAimErrorDegrees * gain,
                 -AUTO_AIM_MAX_POWER, AUTO_AIM_MAX_POWER);
         if (Math.abs(rotation) < AUTO_AIM_MIN_POWER) {
             rotation = Math.copySign(AUTO_AIM_MIN_POWER, rotation);
