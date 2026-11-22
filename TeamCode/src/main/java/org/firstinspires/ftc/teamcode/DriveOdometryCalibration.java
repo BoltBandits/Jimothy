@@ -31,14 +31,15 @@ public class DriveOdometryCalibration extends OpMode {
 
     @Override
     public void init() {
-        frontLeft = hardwareMap.get(DcMotor.class, "left_front_drive");
-        frontRight = hardwareMap.get(DcMotor.class, "right_front_drive");
-        backLeft = hardwareMap.get(DcMotor.class, "left_back_drive");
-        backRight = hardwareMap.get(DcMotor.class, "right_back_drive");
-        leftPod = frontLeft;
-        rightPod = hardwareMap.get(DcMotor.class, "odo_right");
-        centerPod = hardwareMap.get(DcMotor.class, "odo_center");
-        intakeMotor = hardwareMap.get(DcMotor.class, "intake_motor");
+        RobotHookups hookups = RobotHookups.JIMOTHY_LEGACY;
+        frontLeft = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_LEFT);
+        frontRight = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_RIGHT);
+        backLeft = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_LEFT);
+        backRight = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_RIGHT);
+        leftPod = hardwareMap.get(DcMotor.class, hookups.leftOdometry);
+        rightPod = hardwareMap.get(DcMotor.class, hookups.rightOdometry);
+        centerPod = hardwareMap.get(DcMotor.class, hookups.strafeOdometry);
+        intakeMotor = hardwareMap.get(DcMotor.class, RobotHookups.Names.SWEEPER);
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
