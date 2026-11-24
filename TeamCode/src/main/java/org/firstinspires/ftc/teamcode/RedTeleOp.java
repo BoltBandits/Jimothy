@@ -110,11 +110,11 @@ public class RedTeleOp extends JimothyUpgradedTeleOp {
     @Override
     public void init() {
         super.init();
-        diagnosticLeftFront = hardwareMap.tryGet(DcMotor.class, "left_front_drive");
-        diagnosticRightFront = hardwareMap.tryGet(DcMotor.class, "right_front_drive");
-        diagnosticLeftBack = hardwareMap.tryGet(DcMotor.class, "left_back_drive");
-        diagnosticRightBack = hardwareMap.tryGet(DcMotor.class, "right_back_drive");
-        leftPod = hardwareMap.tryGet(DcMotor.class, "left_front_drive");
+        diagnosticLeftFront = hardwareMap.tryGet(DcMotor.class, RobotHookups.Names.FRONT_LEFT);
+        diagnosticRightFront = hardwareMap.tryGet(DcMotor.class, RobotHookups.Names.FRONT_RIGHT);
+        diagnosticLeftBack = hardwareMap.tryGet(DcMotor.class, RobotHookups.Names.BACK_LEFT);
+        diagnosticRightBack = hardwareMap.tryGet(DcMotor.class, RobotHookups.Names.BACK_RIGHT);
+        leftPod = hardwareMap.tryGet(DcMotor.class, RobotHookups.Names.FRONT_LEFT);
         rightPod = hardwareMap.tryGet(DcMotor.class, "odo_right");
         centerPod = hardwareMap.tryGet(DcMotor.class, "odo_center");
         odometryAvailable = leftPod != null && rightPod != null && centerPod != null;

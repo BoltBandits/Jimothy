@@ -133,13 +133,13 @@ public class BioBuzzStarterbotTeleopV6 extends OpMode {
 
     @Override
     public void init() {
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_LEFT);
+        rightFrontDrive = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_RIGHT);
+        leftBackDrive = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_LEFT);
+        rightBackDrive = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_RIGHT);
         // Mechanisms are optional so a drivetrain-only robot can still use TeleOp.
         intake = hardwareMap.tryGet(DcMotor.class, "intake_motor");
-        launcher = hardwareMap.tryGet(DcMotorEx.class, "shooter_motor");
+        launcher = hardwareMap.tryGet(DcMotorEx.class, RobotHookups.Names.SHOOTER);
         windmillServo = hardwareMap.tryGet(CRServo.class, "windmill_servo");
         WebcamName webcam = USB_WEBCAM_ENABLED
                 ? hardwareMap.tryGet(WebcamName.class, "Webcam 1") : null;

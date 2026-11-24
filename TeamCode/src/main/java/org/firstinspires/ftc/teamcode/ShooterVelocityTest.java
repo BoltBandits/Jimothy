@@ -42,7 +42,7 @@ public class ShooterVelocityTest extends OpMode {
 
     @Override
     public void init() {
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter_motor");
+        shooter = hardwareMap.get(DcMotorEx.class, RobotHookups.Names.SHOOTER);
         windmill = hardwareMap.get(CRServo.class, "windmill_servo");
 
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

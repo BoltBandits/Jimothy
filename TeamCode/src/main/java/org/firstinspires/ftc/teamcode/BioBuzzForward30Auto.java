@@ -208,10 +208,10 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        frontLeft = hardwareMap.get(DcMotor.class, "left_front_drive");
-        frontRight = hardwareMap.get(DcMotor.class, "right_front_drive");
-        backLeft = hardwareMap.get(DcMotor.class, "left_back_drive");
-        backRight = hardwareMap.get(DcMotor.class, "right_back_drive");
+        frontLeft = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_LEFT);
+        frontRight = hardwareMap.get(DcMotor.class, RobotHookups.Names.FRONT_RIGHT);
+        backLeft = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_LEFT);
+        backRight = hardwareMap.get(DcMotor.class, RobotHookups.Names.BACK_RIGHT);
         intakeMotor = hardwareMap.get(DcMotor.class, "intake_motor");
         // The left odometry encoder is connected to Control Hub encoder port 0.
         // That encoder port shares the front-left DcMotor mapping, while the
@@ -219,7 +219,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         leftPod = frontLeft;
         rightPod = hardwareMap.get(DcMotor.class, "odo_right");
         centerPod = hardwareMap.get(DcMotor.class, "odo_center");
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter_motor");
+        shooter = hardwareMap.get(DcMotorEx.class, RobotHookups.Names.SHOOTER);
         double shooterMaxVelocity = shooter.getMotorType().getMaxRPM()
                 * shooter.getMotorType().getTicksPerRev() / 60.0;
         shooterVelocity = FIRST_SHOOTER_SPEED_FRACTION * shooterMaxVelocity;
