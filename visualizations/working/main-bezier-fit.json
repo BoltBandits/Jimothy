@@ -1,0 +1,64 @@
+{
+  "project": "main-bezier.pp.json",
+  "sourceProject": "main-editable.pp.json",
+  "sourceBackup": "main-before-bezier-20261127T210544695538Z.pp.json",
+  "method": "Cubic least-squares fit to 2001 polyline samples uniformly spaced by arc length; endpoints fixed.",
+  "degree": 3,
+  "sourcePolyline": [
+    [
+      55.9219,
+      7.7305
+    ],
+    [
+      42.9519,
+      14.1705
+    ],
+    [
+      27.921899648085585,
+      14.829805320945946
+    ],
+    [
+      19.2219,
+      14.6605
+    ],
+    [
+      8.5419,
+      17.4305
+    ]
+  ],
+  "bezierControlPoints": [
+    [
+      55.9219,
+      7.7305
+    ],
+    [
+      42.022799,
+      18.764742
+    ],
+    [
+      24.053606,
+      11.661314
+    ],
+    [
+      8.5419,
+      17.4305
+    ]
+  ],
+  "curveToPolylineMaxSampledDistanceIn": 0.6323521833896544,
+  "polylineToCurveMaxSampledDistanceIn": 0.6453834261693837,
+  "curveSampleCount": 10001,
+  "polylineSampleCount": 2001,
+  "reverseDistanceCurveSegments": 2000,
+  "originalLengthIn": 49.2603050594667,
+  "curveSampledLengthIn": 49.10307221060714,
+  "heading": "Linear from 270 to 272.7 degrees over this curve, replacing the old heading step.",
+  "notes": "Smooth approximation, not an exact polyline replacement. Intermediate waypoints are guides, not interpolation constraints. Distances are sampled estimates. The rest of the project and its waits are preserved. Geometry fitting does not validate drivetrain dynamics or obstacle clearance.",
+  "fieldTranslationFromFitIn": {
+    "x": 1,
+    "y": 0
+  },
+  "sourceBackupTranslationIn": {
+    "x": 1,
+    "y": 0
+  }
+}

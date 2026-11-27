@@ -1,0 +1,275 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 55.9219,
+    "y": 7.7305,
+    "headingDeg": 270,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "main-early-park-3",
+      "name": "First intake approach (Bezier)",
+      "endPoint": {
+        "x": 8.5419,
+        "y": 17.4305
+      },
+      "controlPoints": [
+        {
+          "x": 42.022799,
+          "y": 18.764742
+        },
+        {
+          "x": 24.053606,
+          "y": 11.661314
+        }
+      ],
+      "heading": {
+        "type": "linear",
+        "startDeg": 270,
+        "endDeg": 272.7
+      },
+      "color": "#c4a1ff",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-5",
+      "name": "Intake forward nudge (nominal)",
+      "endPoint": {
+        "x": 9.107177,
+        "y": 5.443822
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 272.7
+      },
+      "color": "#92db72",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-6",
+      "name": "Clearance: back and left",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 270.0
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-7",
+      "name": "CCW half-turn: part 1/2 (in place)",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0.0
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-8",
+      "name": "CCW half-turn: part 2/2 (in place)",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 90.0
+      },
+      "color": "#c4a1ff",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-9",
+      "name": "Second intake approach (Bezier)",
+      "endPoint": {
+        "x": 40.5419,
+        "y": 128.8005
+      },
+      "controlPoints": [
+        {
+          "x": 29.79761414539817,
+          "y": 51.67054119353786
+        },
+        {
+          "x": 15.45815393782637,
+          "y": 91.41291260525455
+        }
+      ],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      },
+      "color": "#ff7698",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-10",
+      "name": "Shift right for second shot",
+      "endPoint": {
+        "x": 42.511516,
+        "y": 129.147796
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100.0
+      },
+      "color": "#92db72",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-12",
+      "name": "Absolute final park target",
+      "endPoint": {
+        "x": 8.1919,
+        "y": 117.6605
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0.0
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "main-early-park-13",
+      "name": "Back away after park",
+      "endPoint": {
+        "x": 3.1919,
+        "y": 117.6605
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0.0
+      },
+      "color": "#c4a1ff",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "wait",
+      "id": "main-early-park-1",
+      "name": "Opening spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "wait",
+      "id": "main-early-park-2",
+      "name": "Opening shooting",
+      "durationMs": 4000
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-3"
+    },
+    {
+      "kind": "wait",
+      "id": "main-early-park-4",
+      "name": "Arm lower settle",
+      "durationMs": 250
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-5"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-6"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-7"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-8"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-9"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-10"
+    },
+    {
+      "kind": "wait",
+      "id": "main-early-park-11",
+      "name": "Second-shot tag / spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-12"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-early-park-13"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

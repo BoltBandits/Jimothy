@@ -1,0 +1,792 @@
+{
+  "sourceCommit": "0bf3c7ebf21e3d1c146824dd5ed87adbf03793c5",
+  "defaultStartPose": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "transform": "fieldXY = routeStartXY + R(routeStartHeading) * localXY; fieldHeading = routeStartHeading + localHeading",
+  "units": "inches and degrees",
+  "sources": {
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java": "a9433eaf07830adf85110be0610744ea53e41888232e42433f5541dd96c9bee8",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BlueAutoMode.java": "ca0478cee42c4b2ac90f71df92f369fb062927c8b75ad8e44ccde20a29312c4b",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java": "77205327dfdfda1587bc6ab48772eb6af7a9901240b4f003232816245fa60b3d",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BlueAutoOpSide.java": "39e3f1b7012a6dea29e17659ea1a1a45579c40b9877745568b259c5b81f33dbb",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java": "4f86f12462cb8c013ffeaf99db5a3766aee523bb582caf69d3a7e525b50bb593",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedOppositeSideMainAuto.java": "91d195c93681ce06591761961bbdb97c4ca656a2b64523e42cad19cc195e7057",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BlueOppositeSideMainAuto.java": "a7867d49822bd6a676e50126b5a766c157e52d3526b09d6ada04ec4ab6c723fb",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/JimothyAutoPark.java": "6d992f2f1b74d2f507a41363b5bb40bb0bea4466c92ba95e7bd3dfffa30fff55",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/JimothySimplestPark.java": "2c99b2da612c84b40aa3b733ef9f37b4818bed412656ba6cebc0fdcb9f225515",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/students/TaraPedroPath.java": "5dd4ca0454b41e16a2eb3e9c3c7b55942cc8f1f5974eb202023e8788ae79d71e",
+    "visualizations/working/main-bezier.pp.json": "96d1436bb550641e76d2046542e0f69808395c0f8345c2f5e133ebb0de41eca8",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/MainAutoCurves.java": "57cd3a4e19e467ffc21005fae9b4017ea2247538794be2e44888490e6e6a0584",
+    "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoBezierCurve.java": "74d6801846184e7184ba6fe6e3b8c5e12b47a61f58b30520d3d3d1bdc80f500f"
+  },
+  "routes": [
+    {
+      "file": "main-nominal.pp.json",
+      "opmodes": [
+        "BioBuzzForward30Auto",
+        "BlueAutoMode"
+      ],
+      "note": "Full successful command sequence, assuming the 25-second forced park does not interrupt it.",
+      "startPose": {
+        "x": 55.9219,
+        "y": 7.7305,
+        "headingDeg": 270
+      },
+      "centerTargetsOutsideField": [],
+      "events": [
+        {
+          "kind": "wait",
+          "name": "Opening spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Opening shooting",
+          "durationMs": 4000,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "bezier",
+          "name": "First intake approach (Bezier)",
+          "localPose": [
+            -9.69999999999999,
+            -47.38,
+            2.7
+          ],
+          "fieldPose": [
+            8.5419,
+            17.4305,
+            272.7
+          ],
+          "source": "MainAutoCurves.java; TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)",
+          "controlPoints": [
+            {
+              "x": 42.022799,
+              "y": 18.764742
+            },
+            {
+              "x": 24.053606,
+              "y": 11.661314
+            }
+          ],
+          "heading": {
+            "type": "linear",
+            "startDeg": 270,
+            "endDeg": 272.7
+          }
+        },
+        {
+          "kind": "wait",
+          "name": "Arm lower settle",
+          "durationMs": 250,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "encoder-nudge",
+          "name": "Intake forward nudge (nominal)",
+          "localPose": [
+            2.2866784995436493,
+            -46.81472259148429,
+            2.7
+          ],
+          "fieldPose": [
+            9.107177,
+            5.443822,
+            272.7
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Clearance: back and left",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            0.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            270.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "turn-preview",
+          "name": "CCW half-turn: part 1/2 (in place)",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            90.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:1185 (turnInPlaceToHeading)"
+        },
+        {
+          "kind": "turn-preview",
+          "name": "CCW half-turn: part 2/2 (in place)",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            180.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            90.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:1185 (turnInPlaceToHeading)"
+        },
+        {
+          "kind": "bezier",
+          "name": "Second intake approach (Bezier)",
+          "localPose": [
+            -121.07,
+            -15.380000000000026,
+            -170
+          ],
+          "fieldPose": [
+            40.5419,
+            128.8005,
+            100
+          ],
+          "source": "MainAutoCurves.java; TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)",
+          "controlPoints": [
+            {
+              "x": 29.79761414539817,
+              "y": 51.67054119353786
+            },
+            {
+              "x": 15.45815393782637,
+              "y": 91.41291260525455
+            }
+          ],
+          "heading": {
+            "type": "constant",
+            "degrees": 100
+          }
+        },
+        {
+          "kind": "relative-target",
+          "name": "Shift right for second shot",
+          "localPose": [
+            -121.41729635533386,
+            -13.41038449397561,
+            -170.0
+          ],
+          "fieldPose": [
+            42.511516,
+            129.147796,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Second-shot tag / spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Second shooting",
+          "durationMs": 4000,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Back away after second shot",
+          "localPose": [
+            -111.56921882521178,
+            -11.673902717306307,
+            -170.0
+          ],
+          "fieldPose": [
+            44.247997,
+            119.299719,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Arm lower settle",
+          "durationMs": 250,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Collect: forward and left",
+          "localPose": [
+            -121.24364817766693,
+            -14.395192246987817,
+            -170.0
+          ],
+          "fieldPose": [
+            41.526708,
+            128.974148,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Intake settle",
+          "durationMs": 500,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "encoder-nudge",
+          "name": "Final intake reverse nudge (nominal)",
+          "localPose": [
+            -118.2892249186303,
+            -13.874247713987026,
+            -170.0
+          ],
+          "fieldPose": [
+            42.047652,
+            126.019725,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "encoder-nudge",
+          "name": "Final intake forward nudge (nominal)",
+          "localPose": [
+            -121.24364817766693,
+            -14.395192246987817,
+            -170.0
+          ],
+          "fieldPose": [
+            41.526708,
+            128.974148,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Final shooting",
+          "durationMs": 4000,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Absolute final park target",
+          "localPose": [
+            -109.93,
+            -47.73,
+            90.0
+          ],
+          "fieldPose": [
+            8.1919,
+            117.6605,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:495 (parkTwoFeetRobotLeft)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Back away after park",
+          "localPose": [
+            -109.93,
+            -52.73,
+            90.0
+          ],
+          "fieldPose": [
+            3.1919,
+            117.6605,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:495 (parkTwoFeetRobotLeft)"
+        }
+      ]
+    },
+    {
+      "file": "main-early-park.pp.json",
+      "opmodes": [
+        "BioBuzzForward30Auto",
+        "BlueAutoMode"
+      ],
+      "note": "Tag missing / shooter spin-up failure branch after second-intake shift.",
+      "startPose": {
+        "x": 55.9219,
+        "y": 7.7305,
+        "headingDeg": 270
+      },
+      "centerTargetsOutsideField": [],
+      "events": [
+        {
+          "kind": "wait",
+          "name": "Opening spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Opening shooting",
+          "durationMs": 4000,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "bezier",
+          "name": "First intake approach (Bezier)",
+          "localPose": [
+            -9.69999999999999,
+            -47.38,
+            2.7
+          ],
+          "fieldPose": [
+            8.5419,
+            17.4305,
+            272.7
+          ],
+          "source": "MainAutoCurves.java; TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)",
+          "controlPoints": [
+            {
+              "x": 42.022799,
+              "y": 18.764742
+            },
+            {
+              "x": 24.053606,
+              "y": 11.661314
+            }
+          ],
+          "heading": {
+            "type": "linear",
+            "startDeg": 270,
+            "endDeg": 272.7
+          }
+        },
+        {
+          "kind": "wait",
+          "name": "Arm lower settle",
+          "durationMs": 250,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "encoder-nudge",
+          "name": "Intake forward nudge (nominal)",
+          "localPose": [
+            2.2866784995436493,
+            -46.81472259148429,
+            2.7
+          ],
+          "fieldPose": [
+            9.107177,
+            5.443822,
+            272.7
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Clearance: back and left",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            0.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            270.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "turn-preview",
+          "name": "CCW half-turn: part 1/2 (in place)",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            90.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:1185 (turnInPlaceToHeading)"
+        },
+        {
+          "kind": "turn-preview",
+          "name": "CCW half-turn: part 2/2 (in place)",
+          "localPose": [
+            -2.990409579524057,
+            -41.05691559526068,
+            180.0
+          ],
+          "fieldPose": [
+            14.864984,
+            10.72091,
+            90.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:1185 (turnInPlaceToHeading)"
+        },
+        {
+          "kind": "bezier",
+          "name": "Second intake approach (Bezier)",
+          "localPose": [
+            -121.07,
+            -15.380000000000026,
+            -170
+          ],
+          "fieldPose": [
+            40.5419,
+            128.8005,
+            100
+          ],
+          "source": "MainAutoCurves.java; TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)",
+          "controlPoints": [
+            {
+              "x": 29.79761414539817,
+              "y": 51.67054119353786
+            },
+            {
+              "x": 15.45815393782637,
+              "y": 91.41291260525455
+            }
+          ],
+          "heading": {
+            "type": "constant",
+            "degrees": 100
+          }
+        },
+        {
+          "kind": "relative-target",
+          "name": "Shift right for second shot",
+          "localPose": [
+            -121.41729635533386,
+            -13.41038449397561,
+            -170.0
+          ],
+          "fieldPose": [
+            42.511516,
+            129.147796,
+            100.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Second-shot tag / spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:200 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Absolute final park target",
+          "localPose": [
+            -109.93,
+            -47.73,
+            90.0
+          ],
+          "fieldPose": [
+            8.1919,
+            117.6605,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:495 (parkTwoFeetRobotLeft)"
+        },
+        {
+          "kind": "relative-target",
+          "name": "Back away after park",
+          "localPose": [
+            -109.93,
+            -52.73,
+            90.0
+          ],
+          "fieldPose": [
+            3.1919,
+            117.6605,
+            0.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BioBuzzForward30Auto.java:495 (parkTwoFeetRobotLeft)"
+        }
+      ]
+    },
+    {
+      "file": "op-side-OUTSIDE-FIELD.pp.json",
+      "opmodes": [
+        "RedAutoOpSide",
+        "BlueAutoOpSide"
+      ],
+      "note": "Outside field from Tara start; square waypoint stops; final move conditional on tag and time.",
+      "startPose": {
+        "x": 54.9219,
+        "y": 7.7305,
+        "headingDeg": 270.0
+      },
+      "centerTargetsOutsideField": [
+        "Stopped waypoint 1",
+        "Stopped waypoint 2",
+        "Stopped waypoint 3",
+        "Direct final move (no stop at reference frame)"
+      ],
+      "events": [
+        {
+          "kind": "target",
+          "name": "Stopped waypoint 1",
+          "localPose": [
+            105.12,
+            -0.92,
+            0.8
+          ],
+          "fieldPose": [
+            54.0019,
+            -97.3895,
+            270.8
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Stopped waypoint 2",
+          "localPose": [
+            105.94,
+            -34.35,
+            2.0
+          ],
+          "fieldPose": [
+            20.5719,
+            -98.2095,
+            272.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Stopped waypoint 3",
+          "localPose": [
+            123.09,
+            -32.87,
+            1.4
+          ],
+          "fieldPose": [
+            22.0519,
+            -115.3595,
+            271.4
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Upright tag / spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Shooting",
+          "durationMs": 5500,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Hold until auto t=24s: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:95 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Direct final move (no stop at reference frame)",
+          "localPose": [
+            105.62575903522956,
+            16.73590199568406,
+            3.7
+          ],
+          "fieldPose": [
+            71.657802,
+            -97.895259,
+            273.7
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/RedAutoOpSide.java:384 (followFinalPath)"
+        }
+      ]
+    },
+    {
+      "file": "red-opposite-side.pp.json",
+      "opmodes": [
+        "RedOppositeSideMainAuto"
+      ],
+      "note": "Move after successful tag/shoot sequence.",
+      "startPose": {
+        "x": 54.9219,
+        "y": 7.7305,
+        "headingDeg": 270.0
+      },
+      "centerTargetsOutsideField": [],
+      "events": [
+        {
+          "kind": "wait",
+          "name": "Tag / spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java:69 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Shooting",
+          "durationMs": 7500,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java:69 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Post-shot recorded target",
+          "localPose": [
+            -8.32,
+            7.0,
+            0.0
+          ],
+          "fieldPose": [
+            61.9219,
+            16.0505,
+            270.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java:69 (runOpMode)"
+        }
+      ]
+    },
+    {
+      "file": "blue-opposite-side.pp.json",
+      "opmodes": [
+        "BlueOppositeSideMainAuto"
+      ],
+      "note": "Stationary: this subclass does not enable the post-shot move.",
+      "startPose": {
+        "x": 54.9219,
+        "y": 7.7305,
+        "headingDeg": 270.0
+      },
+      "centerTargetsOutsideField": [],
+      "events": [
+        {
+          "kind": "wait",
+          "name": "Tag / spin-up: variable, omitted",
+          "durationMs": 0,
+          "variable": true,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java:69 (runOpMode)"
+        },
+        {
+          "kind": "wait",
+          "name": "Shooting",
+          "durationMs": 7500,
+          "variable": false,
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/OppositeSideMainAutoBase.java:69 (runOpMode)"
+        }
+      ]
+    },
+    {
+      "file": "jimothy-auto-park-OUTSIDE-FIELD.pp.json",
+      "opmodes": [
+        "JimothyAutoPark"
+      ],
+      "note": "Outside field from Tara start; two stopped pose targets.",
+      "startPose": {
+        "x": 54.9219,
+        "y": 7.7305,
+        "headingDeg": 270.0
+      },
+      "centerTargetsOutsideField": [
+        "Corner stop",
+        "Park stop"
+      ],
+      "events": [
+        {
+          "kind": "target",
+          "name": "Corner stop",
+          "localPose": [
+            80.46,
+            -0.21,
+            -4.8
+          ],
+          "fieldPose": [
+            54.7119,
+            -72.7295,
+            265.2
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/JimothyAutoPark.java:50 (runOpMode)"
+        },
+        {
+          "kind": "target",
+          "name": "Park stop",
+          "localPose": [
+            83.2,
+            19.25,
+            -4.1
+          ],
+          "fieldPose": [
+            74.1719,
+            -75.4695,
+            265.9
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/JimothyAutoPark.java:50 (runOpMode)"
+        }
+      ]
+    },
+    {
+      "file": "jimothy-simplest-park.pp.json",
+      "opmodes": [
+        "JimothySimplestPark"
+      ],
+      "note": "Nominal encoder-controlled straight drive; timeout/slip can shorten it.",
+      "startPose": {
+        "x": 54.9219,
+        "y": 7.7305,
+        "headingDeg": 270.0
+      },
+      "centerTargetsOutsideField": [],
+      "events": [
+        {
+          "kind": "encoder-nudge",
+          "name": "Encoder park (nominal)",
+          "localPose": [
+            -8.0,
+            0,
+            0
+          ],
+          "fieldPose": [
+            54.9219,
+            15.7305,
+            270.0
+          ],
+          "source": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/JimothySimplestPark.java:23 (runOpMode)"
+        }
+      ]
+    },
+    {
+      "file": "tara-current.pp.json",
+      "opmodes": [
+        "TaraPedroPath"
+      ],
+      "note": "Actual Pedro Bezier curves, copied from source without transforming."
+    }
+  ]
+}

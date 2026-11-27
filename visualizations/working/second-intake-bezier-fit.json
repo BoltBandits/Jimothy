@@ -1,0 +1,70 @@
+{
+  "project": "main-bezier.pp.json",
+  "pathName": "Second intake approach (Bezier)",
+  "sourceBackup": "backups/main-before-second-intake-bezier-20261127T210839692739Z.pp.json",
+  "method": "Cubic least-squares fit to 2001 polyline samples uniformly spaced by arc length, with fixed endpoints.",
+  "degree": 3,
+  "sourcePolyline": [
+    [
+      14.864984,
+      10.72091
+    ],
+    [
+      14.864984,
+      91.280325
+    ],
+    [
+      40.5419,
+      128.8005
+    ]
+  ],
+  "bezierControlPoints": [
+    [
+      14.864984,
+      10.72091
+    ],
+    [
+      15.613411,
+      52.497478
+    ],
+    [
+      6.128777,
+      97.440315
+    ],
+    [
+      40.5419,
+      128.8005
+    ]
+  ],
+  "heading": {
+    "type": "constant",
+    "degrees": 100
+  },
+  "curveToPolylineMaxSampledDistanceIn": 3.0291374570143397,
+  "polylineToCurveMaxSampledDistanceIn": 3.1601510200132363,
+  "curveSampleCount": 10001,
+  "polylineSampleCount": 2001,
+  "reverseDistanceCurveSegments": 2000,
+  "originalLengthIn": 126.02442954197151,
+  "curveSampledLengthIn": 125.21821778166264,
+  "sampledCenterBounds": {
+    "minimum": [
+      14.206903528226459,
+      10.72091
+    ],
+    "maximum": [
+      40.5419,
+      128.8005
+    ]
+  },
+  "notes": "Intermediate corner is a fitting guide, not a preserved waypoint. Deviations are sampled estimates, not proven maxima. Other paths and waits remain identical to the source snapshot. Geometry checks do not establish robot-footprint or obstacle clearance.",
+  "fieldTranslationFromFitIn": {
+    "x": 1,
+    "y": 0
+  },
+  "sourceBackupTranslationIn": {
+    "x": 1,
+    "y": 0
+  },
+  "status": "Historical original fit; current project has subsequent manual control-point edits. Its deviation measurements do not apply to the current curve."
+}

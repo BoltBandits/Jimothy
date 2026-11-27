@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "timestamp": "2026-11-27T20:44:27.473570+00:00",
+  "startPoint": {
+    "x": 56.0,
+    "y": 8.0,
+    "headingDeg": 90.0,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "tara-curve-1",
+      "name": "Tara curve 1",
+      "endPoint": {
+        "x": 10.7425,
+        "y": 13.7643
+      },
+      "controlPoints": [
+        {
+          "x": 25.6744,
+          "y": 24.5519
+        }
+      ],
+      "heading": {
+        "type": "linear",
+        "startDeg": 90.0,
+        "endDeg": 180.0
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "tara-curve-2",
+      "name": "Tara curve 2",
+      "endPoint": {
+        "x": 45.4091,
+        "y": 133.458
+      },
+      "controlPoints": [
+        {
+          "x": 69.1177,
+          "y": 0.0
+        },
+        {
+          "x": 11.8977,
+          "y": 131.4529
+        }
+      ],
+      "heading": {
+        "type": "tangential",
+        "reverse": true
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "tara-curve-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "tara-curve-2"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

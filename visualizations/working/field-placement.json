@@ -1,0 +1,28 @@
+{
+  "project": "main-bezier.pp.json",
+  "meaning": "One inch right on the field image (+field X), translating the entire route.",
+  "translationIn": {
+    "x": 1,
+    "y": 0
+  },
+  "previousStart": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "locked": false,
+    "headingDeg": 270
+  },
+  "currentStart": {
+    "x": 55.9219,
+    "y": 7.7305,
+    "locked": false,
+    "headingDeg": 270
+  },
+  "beforeProject": "backups/main-before-start-offset-20261127T210958986938Z.pp.json",
+  "translatedPointCount": 18,
+  "preserved": [
+    "Relative route geometry",
+    "All headings",
+    "Sequence and waits"
+  ],
+  "timestamp": "2026-11-27T21:09:58.989108+00:00"
+}

@@ -1,0 +1,130 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "op-side-OUTSIDE-FIELD-1",
+      "name": "Stopped waypoint 1",
+      "endPoint": {
+        "x": 54.0019,
+        "y": -97.3895
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 270.8
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "op-side-OUTSIDE-FIELD-2",
+      "name": "Stopped waypoint 2",
+      "endPoint": {
+        "x": 20.5719,
+        "y": -98.2095
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 272.0
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "op-side-OUTSIDE-FIELD-3",
+      "name": "Stopped waypoint 3",
+      "endPoint": {
+        "x": 22.0519,
+        "y": -115.3595
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 271.4
+      },
+      "color": "#c4a1ff",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "op-side-OUTSIDE-FIELD-7",
+      "name": "Direct final move (no stop at reference frame)",
+      "endPoint": {
+        "x": 71.657802,
+        "y": -97.895259
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 273.7
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "op-side-OUTSIDE-FIELD-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "op-side-OUTSIDE-FIELD-2"
+    },
+    {
+      "kind": "path",
+      "lineId": "op-side-OUTSIDE-FIELD-3"
+    },
+    {
+      "kind": "wait",
+      "id": "op-side-OUTSIDE-FIELD-4",
+      "name": "Upright tag / spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "wait",
+      "id": "op-side-OUTSIDE-FIELD-5",
+      "name": "Shooting",
+      "durationMs": 5500
+    },
+    {
+      "kind": "wait",
+      "id": "op-side-OUTSIDE-FIELD-6",
+      "name": "Hold until auto t=24s: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "path",
+      "lineId": "op-side-OUTSIDE-FIELD-7"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

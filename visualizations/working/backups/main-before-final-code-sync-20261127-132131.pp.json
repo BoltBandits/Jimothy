@@ -1,0 +1,406 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 55.9219,
+    "y": 7.7305,
+    "locked": false,
+    "headingDeg": 270
+  },
+  "lines": [
+    {
+      "id": "first-intake-bezier",
+      "color": "#c4a1ff",
+      "name": "First intake approach (Bezier)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 8.5419,
+        "y": 17.4305
+      },
+      "controlPoints": [
+        {
+          "x": 42.022799,
+          "y": 18.764742
+        },
+        {
+          "x": 24.053606,
+          "y": 11.661314
+        }
+      ],
+      "heading": {
+        "type": "linear",
+        "startDeg": 270,
+        "endDeg": 272.7
+      }
+    },
+    {
+      "id": "main-nominal-8",
+      "color": "#c4a1ff",
+      "name": "Intake forward nudge (nominal)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 9.107177,
+        "y": 5.443822
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 272.7
+      }
+    },
+    {
+      "id": "main-nominal-9",
+      "color": "#ff7698",
+      "name": "Clearance: back and left",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 270
+      }
+    },
+    {
+      "id": "main-nominal-10",
+      "color": "#92db72",
+      "name": "CCW half-turn: part 1/2 (in place)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0
+      }
+    },
+    {
+      "id": "main-nominal-11",
+      "color": "#ffb45d",
+      "name": "CCW half-turn: part 2/2 (in place)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 14.864984,
+        "y": 10.72091
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 90
+      }
+    },
+    {
+      "id": "second-intake-bezier",
+      "color": "#5fe0cf",
+      "name": "Second intake approach (Bezier)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 40.5419,
+        "y": 128.8005
+      },
+      "controlPoints": [
+        {
+          "x": 29.79761414539817,
+          "y": 51.67054119353786
+        },
+        {
+          "x": 19.18730700571149,
+          "y": 89.69481789654046
+        }
+      ],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-14",
+      "color": "#ff7698",
+      "name": "Shift right for second shot",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 42.511516,
+        "y": 129.147796
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-17",
+      "color": "#5fe0cf",
+      "name": "Back away after second shot",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 44.247997,
+        "y": 119.299719
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-19",
+      "color": "#ff7698",
+      "name": "Collect: forward and left",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 41.526708,
+        "y": 128.974148
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-21",
+      "color": "#ffb45d",
+      "name": "Final intake reverse nudge (nominal)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 42.047652,
+        "y": 126.019725
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-22",
+      "color": "#5fe0cf",
+      "name": "Final intake forward nudge (nominal)",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 41.526708,
+        "y": 128.974148
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 100
+      }
+    },
+    {
+      "id": "main-nominal-24",
+      "color": "#ff7698",
+      "name": "Absolute final park target",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 8.1919,
+        "y": 117.6605
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0
+      }
+    },
+    {
+      "id": "main-nominal-25",
+      "color": "#92db72",
+      "name": "Back away after park",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": "",
+      "kind": "atomic",
+      "endPoint": {
+        "x": 3.1919,
+        "y": 117.6605
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 0
+      }
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "wait",
+      "id": "main-nominal-1",
+      "name": "Opening spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-2",
+      "name": "Opening shooting",
+      "durationMs": 4000
+    },
+    {
+      "kind": "path",
+      "lineId": "first-intake-bezier"
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-7",
+      "name": "Arm lower settle",
+      "durationMs": 250
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-8"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-9"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-10"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-11"
+    },
+    {
+      "kind": "path",
+      "lineId": "second-intake-bezier"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-14"
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-15",
+      "name": "Second-shot tag / spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-16",
+      "name": "Second shooting",
+      "durationMs": 4000
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-17"
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-18",
+      "name": "Arm lower settle",
+      "durationMs": 250
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-19"
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-20",
+      "name": "Intake settle",
+      "durationMs": 500
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-21"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-22"
+    },
+    {
+      "kind": "wait",
+      "id": "main-nominal-23",
+      "name": "Final shooting",
+      "durationMs": 4000
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-24"
+    },
+    {
+      "kind": "path",
+      "lineId": "main-nominal-25"
+    }
+  ],
+  "fieldPoints": [],
+  "robot": {
+    "forwardVelocity": 75,
+    "strafeVelocity": 65,
+    "aVelocity": 3.141592653589793,
+    "kFriction": 0.1,
+    "rLength": 16,
+    "rWidth": 16,
+    "safetyMargin": 1,
+    "maxAcceleration": 50,
+    "maxDeceleration": 50
+  },
+  "activePaths": []
+}

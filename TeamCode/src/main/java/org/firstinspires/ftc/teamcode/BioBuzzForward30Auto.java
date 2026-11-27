@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** Drives one continuous curved path to x=47, y=-67, heading=-95 degrees. */
+/** Main autonomous with intake curves imported from the Pedro visualizer. */
 @Autonomous(name = "Red Autonomous Mode", group = "Jimothy")
 public class BioBuzzForward30Auto extends LinearOpMode {
     private static final String TAG = "JimothyAuto";
@@ -90,19 +90,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
     private static final double SHOOTER_SPINUP_TIMEOUT_SECONDS = 3.0;
     private static final double SHOOTING_SECONDS = 4.0;
     private static final double SECOND_SHOT_TAG_TIMEOUT_SECONDS = 2.0;
-    // Measured from the audience-side shooting origin during the pushed
-    // calibration run. Keep the robot in its starting orientation.
-    private static final double RED_INTAKE_WAYPOINT_1_X_INCHES = -6.44;
-    private static final double RED_INTAKE_WAYPOINT_1_Y_INCHES = -12.97;
-    private static final double RED_INTAKE_WAYPOINT_2_X_INCHES = -5.71;
-    private static final double RED_INTAKE_WAYPOINT_2_Y_INCHES = -28.61;
-    private static final double RED_INTAKE_WAYPOINT_3_X_INCHES = -6.93;
-    private static final double RED_INTAKE_WAYPOINT_3_Y_INCHES = -36.70;
-    private static final double RED_INTAKE_X_INCHES = -9.70;
-    private static final double RED_INTAKE_Y_INCHES = -47.38;
-    private static final double RED_INTAKE_HEADING_DEGREES = 0.0;
-    private static final double RED_INTAKE_FINAL_HEADING_DEGREES = 2.7;
-    private static final double RED_INTAKE_POSITION_TIMEOUT_SECONDS = 2.0;
+    // Originally 25% into the final diagonal leg. Preserve that late arm raise
+    // at the equivalent fraction of the combined approach's travel distance.
+    private static final double SECOND_INTAKE_ARM_RAISE_PROGRESS = 0.729427374406;
     private static final double ARM_DOWN_POSITION = 0.05;
     private static final double ARM_UP_POSITION = 0.5;
     private static final long ARM_LOWER_SETTLE_MS = 250;
@@ -268,8 +258,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         stopDrive();
         resetPose();
 
-        telemetry.addLine("Red Auto: start pose is X=0, Y=0, heading=0");
-        telemetry.addLine("Shoots 3.5 seconds, then push robot and press B to record");
+        telemetry.addLine("Auto: local start X=0, Y=0, heading=0");
+        telemetry.addData("Pedro field start", "%.4f, %.4f, %.1f deg",
+                MainAutoCurves.FIELD_START_X, MainAutoCurves.FIELD_START_Y,
+                MainAutoCurves.FIELD_START_HEADING_DEGREES);
+        telemetry.addLine("Opening shot, edited intake curves, collection, then park");
         addShootingTelemetry();
         telemetry.update();
 
@@ -281,6 +274,9 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         RobotLog.ii(TAG, "RUN_START id=%s target2=(%.2f,%.2f,%.1f)",
                 runId, SECOND_FINAL_X_INCHES, SECOND_FINAL_Y_INCHES,
                 SECOND_SHOOTING_HEADING_DEGREES);
+        RobotLog.ii(TAG, "PATH_GEOMETRY id=%s sha256=%s field_start=(%.4f,%.4f,%.1f)",
+                runId, MainAutoCurves.GEOMETRY_SHA256, MainAutoCurves.FIELD_START_X,
+                MainAutoCurves.FIELD_START_Y, MainAutoCurves.FIELD_START_HEADING_DEGREES);
         // Spin up only for the opening shot. The shooter is forced off again
         // throughout intake position 1 and the drive to intake position 2.
         startShooter(shooterVelocity);
@@ -296,30 +292,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 keepShooterOffBeforeSecondIntake();
                 startIntake();
                 RobotLog.ii(TAG, "INTAKE_START id=%s after_opening_shot=true", runId);
-                shootingState = "INTAKE RUNNING - FOLLOWING RECORDED PATH";
-                if (!driveToPose(RED_INTAKE_WAYPOINT_1_X_INCHES,
-                        RED_INTAKE_WAYPOINT_1_Y_INCHES,
-                        RED_INTAKE_HEADING_DEGREES,
-                        "Recorded intake path waypoint 1",
-                        3.0, Math.toRadians(8.0), false)) return;
-                if (!driveToPose(RED_INTAKE_WAYPOINT_2_X_INCHES,
-                        RED_INTAKE_WAYPOINT_2_Y_INCHES,
-                        RED_INTAKE_HEADING_DEGREES,
-                        "Recorded intake path waypoint 2",
-                        3.0, Math.toRadians(8.0), false)) return;
-                if (!driveToPose(RED_INTAKE_WAYPOINT_3_X_INCHES,
-                        RED_INTAKE_WAYPOINT_3_Y_INCHES,
-                        RED_INTAKE_HEADING_DEGREES,
-                        "Recorded intake path waypoint 3",
-                        2.0, Math.toRadians(6.0), false)) return;
-                if (!driveToPose(RED_INTAKE_X_INCHES,
-                        RED_INTAKE_Y_INCHES,
-                        RED_INTAKE_FINAL_HEADING_DEGREES,
-                        "Recorded red intake position",
+                shootingState = "INTAKE RUNNING - FOLLOWING EDITED CURVE";
+                if (!followCurve(MainAutoCurves.FIRST_INTAKE,
+                        "First intake approach (edited Bezier)", 8.0, Double.NaN,
                         POSITION_TOLERANCE_INCHES,
-                        HEADING_TOLERANCE_RADIANS,
-                        true,
-                        RED_INTAKE_POSITION_TIMEOUT_SECONDS)) return;
+                        HEADING_TOLERANCE_RADIANS)) return;
                 beginLoweringArmForIntake();
                 finishLoweringArmForIntake();
                 if (!driveIntakeNudge(12.0, 0.20)) return;
@@ -339,24 +316,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                 if (!turnInPlaceToHeading(-180.0,
                         "Fast clearance: turn CCW to -180", 3.0)) return;
 
-                updatePose();
-                double distanceToSecondIntake = Math.hypot(
-                        SECOND_INTAKE_X_INCHES - x,
-                        SECOND_INTAKE_Y_INCHES - y);
-                double straightDistance = distanceToSecondIntake * (2.0 / 3.0);
-                double straightTargetX = x - straightDistance;
-                double straightTargetY = y;
-                if (!followLineSegment(straightTargetX, straightTargetY,
-                        SECOND_INTAKE_HEADING_DEGREES,
-                        "Segment: straight first 2/3 to second intake",
-                        8.0)) return;
                 keepShooterOffBeforeSecondIntake();
-
-                if (!followLineSegment(SECOND_INTAKE_X_INCHES,
-                        SECOND_INTAKE_Y_INCHES,
-                        SECOND_INTAKE_HEADING_DEGREES,
-                        "Segment: diagonal to second intake position", 6.0,
-                        0.25)) return;
+                if (!followCurve(MainAutoCurves.SECOND_INTAKE,
+                        "Second intake approach (edited Bezier)", 14.0,
+                        SECOND_INTAKE_ARM_RAISE_PROGRESS,
+                        2.0, Math.toRadians(4.0))) return;
 
                 // Shift two inches robot-right for the second shot. The later
                 // one-inch-left flower approach leaves the final collection
@@ -1340,9 +1304,23 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         final double segmentLength = Math.hypot(segmentX, segmentY);
         if (segmentLength < 0.01) return true;
 
-        final double unitX = segmentX / segmentLength;
-        final double unitY = segmentY / segmentLength;
-        final double targetHeading = Math.toRadians(targetHeadingDegrees);
+        // A cubic with collinear, evenly spaced controls is exactly a line.
+        AutoBezierCurve line = new AutoBezierCurve(startX, startY,
+                startX + segmentX / 3.0, startY + segmentY / 3.0,
+                startX + segmentX * 2.0 / 3.0, startY + segmentY * 2.0 / 3.0,
+                targetX, targetY, targetHeadingDegrees, targetHeadingDegrees);
+        return followCurve(line, step, timeoutSeconds, armRaiseProgressFraction,
+                2.0, Math.toRadians(4.0));
+    }
+
+    /** Follow imported geometry using our measured three-wheel odometry and drive mixer. */
+    private boolean followCurve(AutoBezierCurve curve, String step, double timeoutSeconds,
+                                double armRaiseProgressFraction,
+                                double positionTolerance, double headingTolerance) {
+        final double targetX = curve.endX();
+        final double targetY = curve.endY();
+        final double segmentLength = curve.length();
+        final double finalHeading = curve.headingAtDistance(segmentLength);
         final double lookaheadInches = 10.0;
         final double maxTranslation = 0.95;
         final double minTranslation = 0.20;
@@ -1351,15 +1329,18 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         final double maxTurn = 0.50;
         ElapsedTime timer = new ElapsedTime();
         boolean armRaised = false;
+        double progress = 0.0;
 
         while (autonomousMayContinue() && timer.seconds() < timeoutSeconds) {
             updatePose();
-            double fromStartX = x - startX;
-            double fromStartY = y - startY;
-            double progress = fromStartX * unitX + fromStartY * unitY;
-            double crossTrack = unitX * fromStartY - unitY * fromStartX;
+            // Arc-length progress drives lookahead, heading and mechanism timing.
+            progress = Math.max(progress, curve.closestDistance(x, y));
+            double crossTrack = Math.hypot(curve.xAtDistance(progress) - x,
+                    curve.yAtDistance(progress) - y);
             double remaining = Math.hypot(targetX - x, targetY - y);
+            double targetHeading = curve.headingAtDistance(progress);
             double headingError = normalizeRadians(targetHeading - heading);
+            double finalHeadingError = normalizeRadians(finalHeading - heading);
 
             if (!armRaised && !Double.isNaN(armRaiseProgressFraction)
                     && progress >= segmentLength * armRaiseProgressFraction) {
@@ -1370,7 +1351,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                         runId, ARM_UP_POSITION, progress, segmentLength);
             }
 
-            if (remaining <= 2.0 && Math.abs(headingError) <= Math.toRadians(4.0)) {
+            if (remaining <= positionTolerance && Math.abs(finalHeadingError) <= headingTolerance) {
                 stopDrive();
                 RobotLog.ii(TAG,
                         "SEGMENT_REACHED id=%s step=%s elapsed=%.2f remaining=%.2f cross=%.2f pose=(%.2f,%.2f,%.1f)",
@@ -1381,8 +1362,8 @@ public class BioBuzzForward30Auto extends LinearOpMode {
 
             double lookaheadProgress = Range.clip(
                     progress + lookaheadInches, 0.0, segmentLength);
-            double aimX = startX + unitX * lookaheadProgress;
-            double aimY = startY + unitY * lookaheadProgress;
+            double aimX = curve.xAtDistance(lookaheadProgress);
+            double aimY = curve.yAtDistance(lookaheadProgress);
             if (segmentLength - progress <= lookaheadInches) {
                 aimX = targetX;
                 aimY = targetY;
@@ -1400,6 +1381,11 @@ public class BioBuzzForward30Auto extends LinearOpMode {
                     1.0 - Math.abs(headingError) / Math.toRadians(100.0),
                     0.25, 1.0);
             translation *= headingScale;
+            if (remaining <= positionTolerance) {
+                // Finish heading without creeping around an already reached endpoint.
+                translation = 0.0;
+                headingError = finalHeadingError;
+            }
 
             double fieldForwardX = translation * aimErrorX / aimLength;
             double fieldForwardY = translation * aimErrorY / aimLength;
@@ -1409,6 +1395,10 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             double robotLeft = -fieldForwardX * sin + fieldForwardY * cos;
             double headingCorrection = Range.clip(
                     headingError * headingKp, -maxTurn, maxTurn);
+            if (Math.abs(headingError) > headingTolerance
+                    && Math.abs(headingCorrection) < MIN_TURN_POWER) {
+                headingCorrection = Math.copySign(MIN_TURN_POWER, headingError);
+            }
             double mixerTurn = -headingCorrection;
 
             // Reserve wheel range for turn instead of allowing normalization
@@ -1430,7 +1420,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
             telemetry.addData("Cross-track / remaining", "%+.1f / %.1f in",
                     crossTrack, remaining);
             telemetry.addData("Heading", "%+.1f / %+.1f deg",
-                    Math.toDegrees(heading), targetHeadingDegrees);
+                    Math.toDegrees(heading), Math.toDegrees(targetHeading));
             telemetry.addData("Command F / L / T", "%+.2f / %+.2f / %+.2f",
                     robotForward, robotLeft, mixerTurn);
             telemetry.update();
@@ -1441,7 +1431,7 @@ public class BioBuzzForward30Auto extends LinearOpMode {
         RobotLog.ww(TAG,
                 "SEGMENT_TIMEOUT id=%s step=%s pose=(%.2f,%.2f,%.1f) target=(%.2f,%.2f,%.1f)",
                 runId, step, x, y, Math.toDegrees(heading),
-                targetX, targetY, targetHeadingDegrees);
+                targetX, targetY, Math.toDegrees(finalHeading));
         return false;
     }
 

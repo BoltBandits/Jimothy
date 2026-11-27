@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "jimothy-simplest-park-1",
+      "name": "Encoder park (nominal)",
+      "endPoint": {
+        "x": 54.9219,
+        "y": 15.7305
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 270.0
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "jimothy-simplest-park-1"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

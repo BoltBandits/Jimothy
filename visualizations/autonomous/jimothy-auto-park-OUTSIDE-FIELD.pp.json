@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "jimothy-auto-park-OUTSIDE-FIELD-1",
+      "name": "Corner stop",
+      "endPoint": {
+        "x": 54.7119,
+        "y": -72.7295
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 265.2
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "jimothy-auto-park-OUTSIDE-FIELD-2",
+      "name": "Park stop",
+      "endPoint": {
+        "x": 74.1719,
+        "y": -75.4695
+      },
+      "controlPoints": [],
+      "heading": {
+        "type": "constant",
+        "degrees": 265.9
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "jimothy-auto-park-OUTSIDE-FIELD-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "jimothy-auto-park-OUTSIDE-FIELD-2"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

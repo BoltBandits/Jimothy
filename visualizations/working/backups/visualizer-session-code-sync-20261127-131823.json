@@ -1,0 +1,496 @@
+{
+  "session": {
+    "version": "2.0.0",
+    "startPoint": {
+      "x": 55.9219,
+      "y": 7.7305,
+      "locked": false,
+      "headingDeg": 270
+    },
+    "lines": [
+      {
+        "id": "first-intake-bezier",
+        "color": "#c4a1ff",
+        "name": "First intake approach (Bezier)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 8.5419,
+          "y": 17.4305
+        },
+        "controlPoints": [
+          {
+            "x": 42.022799,
+            "y": 18.764742
+          },
+          {
+            "x": 24.053606,
+            "y": 11.661314
+          }
+        ],
+        "heading": {
+          "type": "linear",
+          "startDeg": 270,
+          "endDeg": 272.7
+        }
+      },
+      {
+        "id": "main-nominal-8",
+        "color": "#c4a1ff",
+        "name": "Intake forward nudge (nominal)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 9.107177,
+          "y": 5.443822
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 272.7
+        }
+      },
+      {
+        "id": "main-nominal-9",
+        "color": "#ff7698",
+        "name": "Clearance: back and left",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 14.864984,
+          "y": 10.72091
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 270
+        }
+      },
+      {
+        "id": "main-nominal-10",
+        "color": "#92db72",
+        "name": "CCW half-turn: part 1/2 (in place)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 14.864984,
+          "y": 10.72091
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 0
+        }
+      },
+      {
+        "id": "main-nominal-11",
+        "color": "#ffb45d",
+        "name": "CCW half-turn: part 2/2 (in place)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 14.864984,
+          "y": 10.72091
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 90
+        }
+      },
+      {
+        "id": "second-intake-bezier",
+        "color": "#5fe0cf",
+        "name": "Second intake approach (Bezier)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 40.5419,
+          "y": 128.8005
+        },
+        "controlPoints": [
+          {
+            "x": 29.79761414539817,
+            "y": 51.67054119353786
+          },
+          {
+            "x": 19.18730700571149,
+            "y": 89.69481789654046
+          }
+        ],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-14",
+        "color": "#ff7698",
+        "name": "Shift right for second shot",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 42.511516,
+          "y": 129.147796
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-17",
+        "color": "#5fe0cf",
+        "name": "Back away after second shot",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 44.247997,
+          "y": 119.299719
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-19",
+        "color": "#ff7698",
+        "name": "Collect: forward and left",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 41.526708,
+          "y": 128.974148
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-21",
+        "color": "#ffb45d",
+        "name": "Final intake reverse nudge (nominal)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 42.047652,
+          "y": 126.019725
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-22",
+        "color": "#5fe0cf",
+        "name": "Final intake forward nudge (nominal)",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 41.526708,
+          "y": 128.974148
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 100
+        }
+      },
+      {
+        "id": "main-nominal-24",
+        "color": "#ff7698",
+        "name": "Absolute final park target",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 8.1919,
+          "y": 117.6605
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 0
+        }
+      },
+      {
+        "id": "main-nominal-25",
+        "color": "#92db72",
+        "name": "Back away after park",
+        "locked": false,
+        "waitBeforeMs": 0,
+        "waitAfterMs": 0,
+        "waitBeforeName": "",
+        "waitAfterName": "",
+        "kind": "atomic",
+        "endPoint": {
+          "x": 3.1919,
+          "y": 117.6605
+        },
+        "controlPoints": [],
+        "heading": {
+          "type": "constant",
+          "degrees": 0
+        }
+      }
+    ],
+    "shapes": [],
+    "sequence": [
+      {
+        "kind": "wait",
+        "id": "main-nominal-1",
+        "name": "Opening spin-up: variable, omitted",
+        "durationMs": 0
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-2",
+        "name": "Opening shooting",
+        "durationMs": 4000
+      },
+      {
+        "kind": "path",
+        "lineId": "first-intake-bezier"
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-7",
+        "name": "Arm lower settle",
+        "durationMs": 250
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-8"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-9"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-10"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-11"
+      },
+      {
+        "kind": "path",
+        "lineId": "second-intake-bezier"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-14"
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-15",
+        "name": "Second-shot tag / spin-up: variable, omitted",
+        "durationMs": 0
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-16",
+        "name": "Second shooting",
+        "durationMs": 4000
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-17"
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-18",
+        "name": "Arm lower settle",
+        "durationMs": 250
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-19"
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-20",
+        "name": "Intake settle",
+        "durationMs": 500
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-21"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-22"
+      },
+      {
+        "kind": "wait",
+        "id": "main-nominal-23",
+        "name": "Final shooting",
+        "durationMs": 4000
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-24"
+      },
+      {
+        "kind": "path",
+        "lineId": "main-nominal-25"
+      }
+    ],
+    "fieldPoints": [],
+    "robot": {
+      "forwardVelocity": 75,
+      "strafeVelocity": 65,
+      "aVelocity": 3.141592653589793,
+      "kFriction": 0.1,
+      "rLength": 16,
+      "rWidth": 16,
+      "safetyMargin": 1,
+      "maxAcceleration": 50,
+      "maxDeceleration": 50
+    },
+    "activePaths": [],
+    "settings": {
+      "forwardVelocity": 75,
+      "strafeVelocity": 65,
+      "aVelocity": 3.141592653589793,
+      "kFriction": 0.1,
+      "rLength": 16,
+      "rWidth": 16,
+      "safetyMargin": 1,
+      "maxAcceleration": 50,
+      "maxDeceleration": 50,
+      "fieldMap": "biobuzz.webp",
+      "robotImage": "/robot.png",
+      "showGhostPaths": false,
+      "showOnionLayers": false,
+      "onionLayerSpacing": 3,
+      "onionColor": "#dc2626",
+      "onionNextPointOnly": false,
+      "showHeadingArrow": false,
+      "showAllPoints": true,
+      "leftPanelWidth": 402,
+      "rightPanelWidth": 240,
+      "headingArrowLength": 50,
+      "headingArrowColor": "#ffffff",
+      "headingArrowThickness": 2,
+      "pathOpacity": 1,
+      "leftPanelMinWidth": 200,
+      "rightPanelMinWidth": 240,
+      "penToolMaxPaths": 8,
+      "curveThroughMaxPoints": 4,
+      "autoCollapsePanels": false,
+      "experimentalFeatures": {
+        "optimize": true,
+        "curveThrough": false,
+        "obstacles": false
+      }
+    },
+    "currentFilePath": "main-bezier.pp.json",
+    "timestamp": "2026-11-27T21:14:23.612Z"
+  },
+  "files": {
+    "tara-pedro-path.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:44:49.412Z\",\"startPoint\":{\"x\":56,\"y\":8,\"locked\":false,\"headingDeg\":90},\"lines\":[{\"id\":\"tara-curve-1\",\"color\":\"#ffb45d\",\"name\":\"Tara curve 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":10.7425,\"y\":13.7643},\"controlPoints\":[{\"x\":25.6744,\"y\":24.5519}],\"heading\":{\"type\":\"linear\",\"startDeg\":90,\"endDeg\":180}},{\"id\":\"tara-curve-2\",\"color\":\"#5fe0cf\",\"name\":\"Tara curve 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":45.4091,\"y\":133.458},\"controlPoints\":[{\"x\":69.1177,\"y\":0},{\"x\":11.8977,\"y\":131.4529}],\"heading\":{\"type\":\"tangential\",\"reverse\":true}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"tara-curve-1\"},{\"kind\":\"path\",\"lineId\":\"tara-curve-2\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812289412
+    },
+    "tara-pedro-path-0bf3c7e.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:47:40.779Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"tara-curve-1\",\"color\":\"#ffb45d\",\"name\":\"Tara curve 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.4857,\"y\":7.9695},\"controlPoints\":[{\"x\":30.924,\"y\":30.6199}],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"tara-curve-2\",\"color\":\"#5fe0cf\",\"name\":\"Tara curve 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":47.1092,\"y\":127.6301},\"controlPoints\":[{\"x\":39.5059,\"y\":27.2134},{\"x\":15.2936,\"y\":115.089}],\"heading\":{\"type\":\"linear\",\"startDeg\":0,\"endDeg\":90}},{\"id\":\"tara-curve-3\",\"color\":\"#c4a1ff\",\"name\":\"Tara curve 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":12.0397,\"y\":115.8362},\"controlPoints\":[{\"x\":31.4669,\"y\":113.796}],\"heading\":{\"type\":\"constant\",\"degrees\":90}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"tara-curve-1\"},{\"kind\":\"path\",\"lineId\":\"tara-curve-2\"},{\"kind\":\"path\",\"lineId\":\"tara-curve-3\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812460779
+    },
+    "blue-opposite-side.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:05.300Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"blue-opposite-side-1\",\"name\":\"Tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"blue-opposite-side-2\",\"name\":\"Shooting\",\"durationMs\":7500}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812785300
+    },
+    "jimothy-auto-park-OUTSIDE-FIELD.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:06.751Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"jimothy-auto-park-OUTSIDE-FIELD-1\",\"color\":\"#ffb45d\",\"name\":\"Corner stop\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":54.7119,\"y\":-72.7295},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":265.2}},{\"id\":\"jimothy-auto-park-OUTSIDE-FIELD-2\",\"color\":\"#5fe0cf\",\"name\":\"Park stop\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":74.1719,\"y\":-75.4695},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":265.9}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"jimothy-auto-park-OUTSIDE-FIELD-1\"},{\"kind\":\"path\",\"lineId\":\"jimothy-auto-park-OUTSIDE-FIELD-2\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812786751
+    },
+    "jimothy-simplest-park.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:08.234Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"jimothy-simplest-park-1\",\"color\":\"#ffb45d\",\"name\":\"Encoder park (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":54.9219,\"y\":15.7305},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"jimothy-simplest-park-1\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812788234
+    },
+    "main-early-park.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:09.720Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"main-early-park-3\",\"color\":\"#c4a1ff\",\"name\":\"Intake waypoint 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.9519,\"y\":14.1705},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-early-park-4\",\"color\":\"#ff7698\",\"name\":\"Intake waypoint 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":26.3119,\"y\":13.4405},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-early-park-5\",\"color\":\"#92db72\",\"name\":\"Intake waypoint 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":18.2219,\"y\":14.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-early-park-6\",\"color\":\"#ffb45d\",\"name\":\"First intake position\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.5419,\"y\":17.4305},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-early-park-8\",\"color\":\"#c4a1ff\",\"name\":\"Intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":8.107177,\"y\":5.443822},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-early-park-9\",\"color\":\"#ff7698\",\"name\":\"Clearance: back and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-early-park-10\",\"color\":\"#92db72\",\"name\":\"CCW half-turn: part 1/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-early-park-11\",\"color\":\"#ffb45d\",\"name\":\"CCW half-turn: part 2/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":90}},{\"id\":\"main-early-park-12\",\"color\":\"#5fe0cf\",\"name\":\"Straight first 2/3 of distance to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":91.280325},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-early-park-13\",\"color\":\"#c4a1ff\",\"name\":\"Diagonal to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":39.5419,\"y\":128.8005},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-early-park-14\",\"color\":\"#ff7698\",\"name\":\"Shift right for second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.511516,\"y\":129.147796},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-early-park-16\",\"color\":\"#ffb45d\",\"name\":\"Absolute final park target\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-early-park-17\",\"color\":\"#5fe0cf\",\"name\":\"Back away after park\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":2.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}}],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"main-early-park-1\",\"name\":\"Opening spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-early-park-2\",\"name\":\"Opening shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-early-park-3\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-4\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-5\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-6\"},{\"kind\":\"wait\",\"id\":\"main-early-park-7\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-early-park-8\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-9\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-10\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-11\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-12\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-13\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-14\"},{\"kind\":\"wait\",\"id\":\"main-early-park-15\",\"name\":\"Second-shot tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"path\",\"lineId\":\"main-early-park-16\"},{\"kind\":\"path\",\"lineId\":\"main-early-park-17\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812789720
+    },
+    "op-side-OUTSIDE-FIELD.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:11.236Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"op-side-OUTSIDE-FIELD-1\",\"color\":\"#ffb45d\",\"name\":\"Stopped waypoint 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":54.0019,\"y\":-97.3895},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270.8}},{\"id\":\"op-side-OUTSIDE-FIELD-2\",\"color\":\"#5fe0cf\",\"name\":\"Stopped waypoint 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":20.5719,\"y\":-98.2095},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272}},{\"id\":\"op-side-OUTSIDE-FIELD-3\",\"color\":\"#c4a1ff\",\"name\":\"Stopped waypoint 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":22.0519,\"y\":-115.3595},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":271.4}},{\"id\":\"op-side-OUTSIDE-FIELD-7\",\"color\":\"#5fe0cf\",\"name\":\"Direct final move (no stop at reference frame)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":71.657802,\"y\":-97.895259},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":273.7}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"op-side-OUTSIDE-FIELD-1\"},{\"kind\":\"path\",\"lineId\":\"op-side-OUTSIDE-FIELD-2\"},{\"kind\":\"path\",\"lineId\":\"op-side-OUTSIDE-FIELD-3\"},{\"kind\":\"wait\",\"id\":\"op-side-OUTSIDE-FIELD-4\",\"name\":\"Upright tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"op-side-OUTSIDE-FIELD-5\",\"name\":\"Shooting\",\"durationMs\":5500},{\"kind\":\"wait\",\"id\":\"op-side-OUTSIDE-FIELD-6\",\"name\":\"Hold until auto t=24s: variable, omitted\",\"durationMs\":0},{\"kind\":\"path\",\"lineId\":\"op-side-OUTSIDE-FIELD-7\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812791236
+    },
+    "red-opposite-side.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:12.717Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"red-opposite-side-3\",\"color\":\"#c4a1ff\",\"name\":\"Post-shot recorded target\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":61.9219,\"y\":16.0505},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}}],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"red-opposite-side-1\",\"name\":\"Tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"red-opposite-side-2\",\"name\":\"Shooting\",\"durationMs\":7500},{\"kind\":\"path\",\"lineId\":\"red-opposite-side-3\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812792717
+    },
+    "tara-current.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:14.219Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"tara-curve-1\",\"color\":\"#ffb45d\",\"name\":\"Tara curve 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.4857,\"y\":7.9695},\"controlPoints\":[{\"x\":30.924,\"y\":30.6199}],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"tara-curve-2\",\"color\":\"#5fe0cf\",\"name\":\"Tara curve 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":47.1092,\"y\":127.6301},\"controlPoints\":[{\"x\":39.5059,\"y\":27.2134},{\"x\":15.2936,\"y\":115.089}],\"heading\":{\"type\":\"linear\",\"startDeg\":0,\"endDeg\":90}},{\"id\":\"tara-curve-3\",\"color\":\"#c4a1ff\",\"name\":\"Tara curve 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":12.0397,\"y\":115.8362},\"controlPoints\":[{\"x\":31.4669,\"y\":113.796}],\"heading\":{\"type\":\"constant\",\"degrees\":90}}],\"shapes\":[],\"sequence\":[{\"kind\":\"path\",\"lineId\":\"tara-curve-1\"},{\"kind\":\"path\",\"lineId\":\"tara-curve-2\"},{\"kind\":\"path\",\"lineId\":\"tara-curve-3\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812794219
+    },
+    "main-nominal.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T20:53:15.717Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"main-nominal-3\",\"color\":\"#c4a1ff\",\"name\":\"Intake waypoint 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.9519,\"y\":14.1705},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-4\",\"color\":\"#ff7698\",\"name\":\"Intake waypoint 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":26.3119,\"y\":13.4405},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-5\",\"color\":\"#92db72\",\"name\":\"Intake waypoint 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":18.2219,\"y\":14.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-6\",\"color\":\"#ffb45d\",\"name\":\"First intake position\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.5419,\"y\":17.4305},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-nominal-8\",\"color\":\"#c4a1ff\",\"name\":\"Intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":8.107177,\"y\":5.443822},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-nominal-9\",\"color\":\"#ff7698\",\"name\":\"Clearance: back and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-10\",\"color\":\"#92db72\",\"name\":\"CCW half-turn: part 1/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-11\",\"color\":\"#ffb45d\",\"name\":\"CCW half-turn: part 2/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":90}},{\"id\":\"main-nominal-12\",\"color\":\"#5fe0cf\",\"name\":\"Straight first 2/3 of distance to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":91.280325},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-13\",\"color\":\"#c4a1ff\",\"name\":\"Diagonal to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":39.5419,\"y\":128.8005},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-14\",\"color\":\"#ff7698\",\"name\":\"Shift right for second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.511516,\"y\":129.147796},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-17\",\"color\":\"#5fe0cf\",\"name\":\"Back away after second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":43.247997,\"y\":119.299719},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-19\",\"color\":\"#ff7698\",\"name\":\"Collect: forward and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":40.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-21\",\"color\":\"#ffb45d\",\"name\":\"Final intake reverse nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.047652,\"y\":126.019725},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-22\",\"color\":\"#5fe0cf\",\"name\":\"Final intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":40.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-24\",\"color\":\"#ff7698\",\"name\":\"Absolute final park target\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-25\",\"color\":\"#92db72\",\"name\":\"Back away after park\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":2.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}}],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"main-nominal-1\",\"name\":\"Opening spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-2\",\"name\":\"Opening shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-3\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-4\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-5\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-6\"},{\"kind\":\"wait\",\"id\":\"main-nominal-7\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-8\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-9\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-10\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-11\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-12\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-13\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-14\"},{\"kind\":\"wait\",\"id\":\"main-nominal-15\",\"name\":\"Second-shot tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-16\",\"name\":\"Second shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-17\"},{\"kind\":\"wait\",\"id\":\"main-nominal-18\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-19\"},{\"kind\":\"wait\",\"id\":\"main-nominal-20\",\"name\":\"Intake settle\",\"durationMs\":500},{\"kind\":\"path\",\"lineId\":\"main-nominal-21\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-22\"},{\"kind\":\"wait\",\"id\":\"main-nominal-23\",\"name\":\"Final shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-24\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-25\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795812795717
+    },
+    "main-editable.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T21:02:16.823Z\",\"startPoint\":{\"x\":54.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"kind\":\"compound\",\"id\":\"line-mwzgvvgn-uovxpc\",\"name\":\"First intake approach\",\"color\":\"#c4a1ff\",\"segments\":[{\"id\":\"main-nominal-3\",\"color\":\"#c4a1ff\",\"name\":\"Intake waypoint 1\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.9519,\"y\":14.1705},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-4\",\"color\":\"#ff7698\",\"name\":\"Intake waypoint 2\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":26.921899648085585,\"y\":14.829805320945946},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-5\",\"color\":\"#92db72\",\"name\":\"Intake waypoint 3\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":18.2219,\"y\":14.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-6\",\"color\":\"#ffb45d\",\"name\":\"First intake position\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.5419,\"y\":17.4305},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}}],\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\"},{\"id\":\"main-nominal-8\",\"color\":\"#c4a1ff\",\"name\":\"Intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":8.107177,\"y\":5.443822},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-nominal-9\",\"color\":\"#ff7698\",\"name\":\"Clearance: back and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-10\",\"color\":\"#92db72\",\"name\":\"CCW half-turn: part 1/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-11\",\"color\":\"#ffb45d\",\"name\":\"CCW half-turn: part 2/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":90}},{\"id\":\"main-nominal-12\",\"color\":\"#5fe0cf\",\"name\":\"Straight first 2/3 of distance to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":13.864984,\"y\":91.280325},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-13\",\"color\":\"#c4a1ff\",\"name\":\"Diagonal to second intake\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":39.5419,\"y\":128.8005},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-14\",\"color\":\"#ff7698\",\"name\":\"Shift right for second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.511516,\"y\":129.147796},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-17\",\"color\":\"#5fe0cf\",\"name\":\"Back away after second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":43.247997,\"y\":119.299719},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-19\",\"color\":\"#ff7698\",\"name\":\"Collect: forward and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":40.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-21\",\"color\":\"#ffb45d\",\"name\":\"Final intake reverse nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.047652,\"y\":126.019725},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-22\",\"color\":\"#5fe0cf\",\"name\":\"Final intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":40.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-24\",\"color\":\"#ff7698\",\"name\":\"Absolute final park target\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":7.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-25\",\"color\":\"#92db72\",\"name\":\"Back away after park\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":2.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}}],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"main-nominal-1\",\"name\":\"Opening spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-2\",\"name\":\"Opening shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-3\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-4\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-5\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-6\"},{\"kind\":\"wait\",\"id\":\"main-nominal-7\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-8\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-9\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-10\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-11\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-12\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-13\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-14\"},{\"kind\":\"wait\",\"id\":\"main-nominal-15\",\"name\":\"Second-shot tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-16\",\"name\":\"Second shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-17\"},{\"kind\":\"wait\",\"id\":\"main-nominal-18\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-19\"},{\"kind\":\"wait\",\"id\":\"main-nominal-20\",\"name\":\"Intake settle\",\"durationMs\":500},{\"kind\":\"path\",\"lineId\":\"main-nominal-21\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-22\"},{\"kind\":\"wait\",\"id\":\"main-nominal-23\",\"name\":\"Final shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-24\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-25\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795813336823
+    },
+    "main-bezier.pp.json": {
+      "content": "{\"version\":\"2.0.0\",\"timestamp\":\"2026-11-27T21:14:30.896Z\",\"startPoint\":{\"x\":55.9219,\"y\":7.7305,\"locked\":false,\"headingDeg\":270},\"lines\":[{\"id\":\"first-intake-bezier\",\"color\":\"#c4a1ff\",\"name\":\"First intake approach (Bezier)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":8.5419,\"y\":17.4305},\"controlPoints\":[{\"x\":42.022799,\"y\":18.764742},{\"x\":24.053606,\"y\":11.661314}],\"heading\":{\"type\":\"linear\",\"startDeg\":270,\"endDeg\":272.7}},{\"id\":\"main-nominal-8\",\"color\":\"#c4a1ff\",\"name\":\"Intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":9.107177,\"y\":5.443822},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":272.7}},{\"id\":\"main-nominal-9\",\"color\":\"#ff7698\",\"name\":\"Clearance: back and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":14.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":270}},{\"id\":\"main-nominal-10\",\"color\":\"#92db72\",\"name\":\"CCW half-turn: part 1/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":14.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-11\",\"color\":\"#ffb45d\",\"name\":\"CCW half-turn: part 2/2 (in place)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":14.864984,\"y\":10.72091},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":90}},{\"id\":\"second-intake-bezier\",\"color\":\"#5fe0cf\",\"name\":\"Second intake approach (Bezier)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":40.5419,\"y\":128.8005},\"controlPoints\":[{\"x\":29.79761414539817,\"y\":51.67054119353786},{\"x\":19.18730700571149,\"y\":89.69481789654046}],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-14\",\"color\":\"#ff7698\",\"name\":\"Shift right for second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":42.511516,\"y\":129.147796},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-17\",\"color\":\"#5fe0cf\",\"name\":\"Back away after second shot\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":44.247997,\"y\":119.299719},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-19\",\"color\":\"#ff7698\",\"name\":\"Collect: forward and left\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-21\",\"color\":\"#ffb45d\",\"name\":\"Final intake reverse nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":42.047652,\"y\":126.019725},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-22\",\"color\":\"#5fe0cf\",\"name\":\"Final intake forward nudge (nominal)\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":41.526708,\"y\":128.974148},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":100}},{\"id\":\"main-nominal-24\",\"color\":\"#ff7698\",\"name\":\"Absolute final park target\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":8.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}},{\"id\":\"main-nominal-25\",\"color\":\"#92db72\",\"name\":\"Back away after park\",\"locked\":false,\"waitBeforeMs\":0,\"waitAfterMs\":0,\"waitBeforeName\":\"\",\"waitAfterName\":\"\",\"kind\":\"atomic\",\"endPoint\":{\"x\":3.1919,\"y\":117.6605},\"controlPoints\":[],\"heading\":{\"type\":\"constant\",\"degrees\":0}}],\"shapes\":[],\"sequence\":[{\"kind\":\"wait\",\"id\":\"main-nominal-1\",\"name\":\"Opening spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-2\",\"name\":\"Opening shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"first-intake-bezier\"},{\"kind\":\"wait\",\"id\":\"main-nominal-7\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-8\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-9\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-10\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-11\"},{\"kind\":\"path\",\"lineId\":\"second-intake-bezier\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-14\"},{\"kind\":\"wait\",\"id\":\"main-nominal-15\",\"name\":\"Second-shot tag / spin-up: variable, omitted\",\"durationMs\":0},{\"kind\":\"wait\",\"id\":\"main-nominal-16\",\"name\":\"Second shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-17\"},{\"kind\":\"wait\",\"id\":\"main-nominal-18\",\"name\":\"Arm lower settle\",\"durationMs\":250},{\"kind\":\"path\",\"lineId\":\"main-nominal-19\"},{\"kind\":\"wait\",\"id\":\"main-nominal-20\",\"name\":\"Intake settle\",\"durationMs\":500},{\"kind\":\"path\",\"lineId\":\"main-nominal-21\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-22\"},{\"kind\":\"wait\",\"id\":\"main-nominal-23\",\"name\":\"Final shooting\",\"durationMs\":4000},{\"kind\":\"path\",\"lineId\":\"main-nominal-24\"},{\"kind\":\"path\",\"lineId\":\"main-nominal-25\"}],\"fieldPoints\":[],\"robot\":{\"forwardVelocity\":75,\"strafeVelocity\":65,\"aVelocity\":3.141592653589793,\"kFriction\":0.1,\"rLength\":16,\"rWidth\":16,\"safetyMargin\":1,\"maxAcceleration\":50,\"maxDeceleration\":50},\"activePaths\":[]}",
+      "modified": 1795814070896
+    }
+  }
+}

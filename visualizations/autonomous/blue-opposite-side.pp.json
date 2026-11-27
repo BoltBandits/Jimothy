@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "lines": [],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "wait",
+      "id": "blue-opposite-side-1",
+      "name": "Tag / spin-up: variable, omitted",
+      "durationMs": 0
+    },
+    {
+      "kind": "wait",
+      "id": "blue-opposite-side-2",
+      "name": "Shooting",
+      "durationMs": 7500
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}

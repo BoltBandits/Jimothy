@@ -1,0 +1,108 @@
+{
+  "version": "2.0.0",
+  "startPoint": {
+    "x": 54.9219,
+    "y": 7.7305,
+    "headingDeg": 270.0,
+    "locked": false
+  },
+  "lines": [
+    {
+      "kind": "atomic",
+      "id": "tara-curve-1",
+      "name": "Tara curve 1",
+      "endPoint": {
+        "x": 7.4857,
+        "y": 7.9695
+      },
+      "controlPoints": [
+        {
+          "x": 30.924,
+          "y": 30.6199
+        }
+      ],
+      "heading": {
+        "type": "constant",
+        "degrees": 270.0
+      },
+      "color": "#ffb45d",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "tara-curve-2",
+      "name": "Tara curve 2",
+      "endPoint": {
+        "x": 47.1092,
+        "y": 127.6301
+      },
+      "controlPoints": [
+        {
+          "x": 39.5059,
+          "y": 27.2134
+        },
+        {
+          "x": 15.2936,
+          "y": 115.089
+        }
+      ],
+      "heading": {
+        "type": "linear",
+        "startDeg": 0.0,
+        "endDeg": 90.0
+      },
+      "color": "#5fe0cf",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    },
+    {
+      "kind": "atomic",
+      "id": "tara-curve-3",
+      "name": "Tara curve 3",
+      "endPoint": {
+        "x": 12.0397,
+        "y": 115.8362
+      },
+      "controlPoints": [
+        {
+          "x": 31.4669,
+          "y": 113.796
+        }
+      ],
+      "heading": {
+        "type": "constant",
+        "degrees": 90.0
+      },
+      "color": "#c4a1ff",
+      "locked": false,
+      "waitBeforeMs": 0,
+      "waitAfterMs": 0,
+      "waitBeforeName": "",
+      "waitAfterName": ""
+    }
+  ],
+  "shapes": [],
+  "sequence": [
+    {
+      "kind": "path",
+      "lineId": "tara-curve-1"
+    },
+    {
+      "kind": "path",
+      "lineId": "tara-curve-2"
+    },
+    {
+      "kind": "path",
+      "lineId": "tara-curve-3"
+    }
+  ],
+  "fieldPoints": [],
+  "activePaths": []
+}
